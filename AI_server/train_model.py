@@ -31,6 +31,7 @@
 """
 
 import os
+import json
 import argparse
 import numpy as np
 from pathlib import Path
@@ -40,7 +41,7 @@ import tensorflow as tf
 from tensorflow.keras import layers, Model
 from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras.callbacks import (
-    EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+    EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, Callback
 )
 from sklearn.model_selection import train_test_split
 
@@ -308,9 +309,25 @@ def build_model():
     return Model(inputs, outputs), base
 
 
+# ── 학습 상태 저장 콜백 ──────────────────────────────────────────────────────
+
+class SaveStateCallback(Callback):
+    """에포크 완료 시마다 현재 phase와 epoch를 JSON으로 저장 (resume 지원)"""
+    def __init__(self, state_path: str, phase: int):
+        super().__init__()
+        self.state_path = state_path
+        self.phase = phase
+
+    def on_epoch_end(self, epoch, logs=None):
+        state = {'phase': self.phase, 'completed_epoch': epoch + 1}
+        with open(self.state_path, 'w') as f:
+            json.dump(state, f)
+
+
 # ── 메인 ─────────────────────────────────────────────────────────────────────
 
-def main(data_dir: str, korean_dir: str, utkface_dir: str, child_dir: str, output_dir: str):
+def main(data_dir: str, korean_dir: str, utkface_dir: str, child_dir: str,
+         output_dir: str, resume: bool):
     print("=" * 60)
     print("나이 인식 모델 학습 시작")
     print("=" * 60)
@@ -370,50 +387,88 @@ def main(data_dir: str, korean_dir: str, utkface_dir: str, child_dir: str, outpu
     # 4. 클래스 가중치 (아동·고령 클래스 부스팅 포함)
     class_weights = compute_class_weights(train_l)
 
-    # 5. 모델 구성
-    model, base_model = build_model()
-    print(f"\n[모델] 파라미터: {model.count_params():,}")
-
+    # 5. 출력 경로 및 상태 파일 설정
     out_path = Path(output_dir)
     out_path.mkdir(parents=True, exist_ok=True)
-    h5_path = str(out_path / "age_model.h5")
+    h5_path    = str(out_path / "age_model.h5")
+    state_path = str(out_path / "training_state.json")
 
-    callbacks = [
-        EarlyStopping(monitor='val_accuracy', patience=6, restore_best_weights=True, verbose=1),
-        ModelCheckpoint(h5_path, monitor='val_accuracy', save_best_only=True, verbose=1),
-        ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, min_lr=1e-7, verbose=1),
-    ]
+    # 6. resume 시 저장된 상태 읽기
+    start_phase = 1
+    start_epoch = 0
+    if resume:
+        if not os.path.isfile(h5_path):
+            raise FileNotFoundError(f"resume 할 모델이 없습니다: {h5_path}")
+        if not os.path.isfile(state_path):
+            raise FileNotFoundError(f"학습 상태 파일이 없습니다: {state_path}")
+        with open(state_path) as f:
+            state = json.load(f)
+        start_phase = state['phase']
+        start_epoch = state['completed_epoch']
+        print(f"\n[Resume] Phase {start_phase}, Epoch {start_epoch + 1}부터 이어서 학습합니다.")
+
+    # 7. 모델 구성 또는 로드
+    if resume:
+        print("[Resume] 저장된 모델 로드 중...")
+        model = tf.keras.models.load_model(h5_path)
+        # base_model 참조 추출 (Phase 2 fine-tuning 시 필요)
+        base_model = next(l for l in model.layers if isinstance(l, tf.keras.Model))
+        print(f"[Resume] 모델 로드 완료 (파라미터: {model.count_params():,})")
+    else:
+        model, base_model = build_model()
+        print(f"\n[모델] 파라미터: {model.count_params():,}")
+
+    def make_callbacks(phase: int):
+        return [
+            EarlyStopping(monitor='val_accuracy', patience=6,
+                          restore_best_weights=True, verbose=1),
+            ModelCheckpoint(h5_path, monitor='val_accuracy',
+                            save_best_only=False, verbose=1),
+            ReduceLROnPlateau(monitor='val_loss', factor=0.5,
+                              patience=3, min_lr=1e-7, verbose=1),
+            SaveStateCallback(state_path, phase=phase),
+        ]
 
     # ── Phase 1: backbone 고정, 분류 헤드 학습 ───────────────────────────
-    print("\n[Phase 1] Backbone 고정 - 분류 헤드 학습")
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(LEARNING_RATE),
-        loss='categorical_crossentropy',
-        metrics=['accuracy', tf.keras.metrics.TopKCategoricalAccuracy(k=2, name='top2_acc')]
-    )
-    model.fit(
-        train_ds, epochs=EPOCHS_FROZEN,
-        validation_data=val_ds, class_weight=class_weights,
-        callbacks=callbacks,
-    )
+    if start_phase == 1:
+        print(f"\n[Phase 1] Backbone 고정 - 분류 헤드 학습 "
+              f"(Epoch {start_epoch + 1}/{EPOCHS_FROZEN}부터)")
+        base_model.trainable = False
+        model.compile(
+            optimizer=tf.keras.optimizers.Adam(LEARNING_RATE),
+            loss='categorical_crossentropy',
+            metrics=['accuracy',
+                     tf.keras.metrics.TopKCategoricalAccuracy(k=2, name='top2_acc')]
+        )
+        model.fit(
+            train_ds, epochs=EPOCHS_FROZEN, initial_epoch=start_epoch,
+            validation_data=val_ds, class_weight=class_weights,
+            callbacks=make_callbacks(phase=1),
+        )
+        start_epoch = 0  # Phase 2는 처음부터
 
     # ── Phase 2: 상위 30% 레이어 미세 조정 ───────────────────────────────
-    print("\n[Phase 2] Fine-tuning - MobileNetV2 상위 30% 레이어 개방")
+    print("\n[Phase 2] Fine-tuning - MobileNetV2 상위 30% 레이어 개방"
+          + (f" (Epoch {start_epoch + 1}/{EPOCHS_FINETUNE}부터)"
+             if start_phase == 2 else ""))
     base_model.trainable = True
     freeze_until = int(len(base_model.layers) * 0.7)
     for layer in base_model.layers[:freeze_until]:
         layer.trainable = False
-    print(f"  미세 조정 레이어: {len(base_model.layers) - freeze_until}개 / 전체 {len(base_model.layers)}개")
+    print(f"  미세 조정 레이어: {len(base_model.layers) - freeze_until}개 / "
+          f"전체 {len(base_model.layers)}개")
 
     model.compile(
         optimizer=tf.keras.optimizers.Adam(FINETUNE_LR),
         loss='categorical_crossentropy',
-        metrics=['accuracy', tf.keras.metrics.TopKCategoricalAccuracy(k=2, name='top2_acc')]
+        metrics=['accuracy',
+                 tf.keras.metrics.TopKCategoricalAccuracy(k=2, name='top2_acc')]
     )
     model.fit(
         train_ds, epochs=EPOCHS_FINETUNE,
+        initial_epoch=(start_epoch if start_phase == 2 else 0),
         validation_data=val_ds, class_weight=class_weights,
-        callbacks=callbacks,
+        callbacks=make_callbacks(phase=2),
     )
 
     # ── 최종 평가 ────────────────────────────────────────────────────────
@@ -456,5 +511,10 @@ if __name__ == '__main__':
         default=os.path.join(os.path.dirname(__file__), 'models', 'my_saved_model'),
         help='학습된 모델 저장 경로'
     )
+    parser.add_argument(
+        '--resume', action='store_true',
+        help='이전에 중단된 학습을 이어서 진행 (age_model.h5 + training_state.json 필요)'
+    )
     args = parser.parse_args()
-    main(args.data_dir, args.korean_dir, args.utkface_dir, args.child_dir, args.output_dir)
+    main(args.data_dir, args.korean_dir, args.utkface_dir, args.child_dir,
+         args.output_dir, args.resume)
