@@ -40,7 +40,7 @@ import tensorflow as tf
 from tensorflow.keras import layers, Model
 from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras.callbacks import (
-    EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, TensorBoard
+    EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 )
 from sklearn.model_selection import train_test_split
 
@@ -325,15 +325,12 @@ def main(data_dir: str, korean_dir: str, utkface_dir: str, child_dir: str, outpu
         labels += kl + kl2
 
     if utkface_dir:
-        # UTKFace 루트와 utkcropped 하위 폴더 모두 시도
-        up, ul = load_dataset(utkface_dir, parse_utkface, "UTKFace")
+        # utkcropped 하위 폴더가 있으면 우선 사용, 없으면 루트 탐색
         sub = os.path.join(utkface_dir, 'utkcropped')
         if os.path.isdir(sub):
-            up2, ul2 = load_dataset(sub, parse_utkface, "UTKFace/utkcropped")
-            seen = set(up)
-            for p, l in zip(up2, ul2):
-                if p not in seen:
-                    up.append(p); ul.append(l); seen.add(p)
+            up, ul = load_dataset(sub, parse_utkface, "UTKFace/utkcropped")
+        else:
+            up, ul = load_dataset(utkface_dir, parse_utkface, "UTKFace")
         paths  += up
         labels += ul
         print(f"[UTKFace] 최종 {len(up):,}장 추가")
@@ -385,11 +382,10 @@ def main(data_dir: str, korean_dir: str, utkface_dir: str, child_dir: str, outpu
         EarlyStopping(monitor='val_accuracy', patience=6, restore_best_weights=True, verbose=1),
         ModelCheckpoint(h5_path, monitor='val_accuracy', save_best_only=True, verbose=1),
         ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, min_lr=1e-7, verbose=1),
-        TensorBoard(log_dir=str(out_path / "logs"), histogram_freq=0),
     ]
 
     # ── Phase 1: backbone 고정, 분류 헤드 학습 ───────────────────────────
-    print("\n[Phase 1] Backbone 고정 — 분류 헤드 학습")
+    print("\n[Phase 1] Backbone 고정 - 분류 헤드 학습")
     model.compile(
         optimizer=tf.keras.optimizers.Adam(LEARNING_RATE),
         loss='categorical_crossentropy',
@@ -402,7 +398,7 @@ def main(data_dir: str, korean_dir: str, utkface_dir: str, child_dir: str, outpu
     )
 
     # ── Phase 2: 상위 30% 레이어 미세 조정 ───────────────────────────────
-    print("\n[Phase 2] Fine-tuning — MobileNetV2 상위 30% 레이어 개방")
+    print("\n[Phase 2] Fine-tuning - MobileNetV2 상위 30% 레이어 개방")
     base_model.trainable = True
     freeze_until = int(len(base_model.layers) * 0.7)
     for layer in base_model.layers[:freeze_until]:
