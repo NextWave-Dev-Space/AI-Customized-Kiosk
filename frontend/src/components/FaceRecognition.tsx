@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -108,7 +108,7 @@ const FaceRecognition = () => {
       setPredictedAge(averageAge);
 
       if (averageAge < 10 || childConfidence >= 3) {
-        setTimeout(() => router.push('/children-menu'), 5000);
+        setTimeout(() => router.push('/elderly-menu'), 5000);
       } else if (averageAge >= 50 || elderlyConfidence >= 3) {
         setTimeout(() => router.push('/elderly-menu'), 5000);
       } else {
@@ -140,16 +140,16 @@ const FaceRecognition = () => {
 
   return (
     <div className="face-recognition-screen">
-      <h1 className="facerecognition-main-heading-Face">AI가 얼굴인식을 시작합니다.</h1>
+      <h1 className="facerecognition-main-heading-Face">AI媛 ?쇨뎬?몄떇???쒖옉?⑸땲??</h1>
       <div className="facerecognition-video-container">
         <video ref={videoRef} className="facerecognition-video" playsInline />
         <canvas ref={canvasRef} className="facerecognition-video-canvas" />
-        <div className="facerecognition-overlay-text">카메라 기능</div>
+        <div className="facerecognition-overlay-text">移대찓??湲곕뒫</div>
       </div>
-      <p className="facerecognition-instruction-text">화면을 잠시 응시해 주세요.</p>
+      <p className="facerecognition-instruction-text">?붾㈃???좎떆 ?묒떆??二쇱꽭??</p>
       {showRecognition && (
         <div className="facerecognition-recognition-popup">
-          인식을 완료했습니다.<br />잠시만 기다려주세요.
+          ?몄떇???꾨즺?덉뒿?덈떎.<br />?좎떆留?湲곕떎?ㅼ＜?몄슂.
         </div>
       )}
     </div>
