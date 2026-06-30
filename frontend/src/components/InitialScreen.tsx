@@ -57,9 +57,6 @@ const InitialScreen = () => {
         <button className="initial-option-button" onClick={() => router.push('/face-recognition')}>
           주문 시작
         </button>
-        <button className="initial-option-button-2" onClick={() => router.push('/secret-root')}>
-          비상용
-        </button>
         <button className="initial-transparent-button" onClick={() => {}}></button>
       </div>
     </div>
