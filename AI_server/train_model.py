@@ -118,6 +118,26 @@ def parse_aihub_korean(filename: str):
     return None
 
 
+def parse_utkface(filename: str):
+    """
+    UTKFace Cropped 형식: {나이}_{성별}_{인종}_{날짜}.jpg.chip.jpg
+    예) 5_1_1_20170103140724315.jpg.chip.jpg → 나이 5
+    인종 코드: 0=White, 1=Asian, 2=Black, 3=Indian, 4=Others
+    """
+    # .jpg.chip.jpg 또는 .chip.jpg 제거
+    stem = filename.replace('.jpg.chip.jpg', '').replace('.chip.jpg', '')
+    parts = stem.split('_')
+    if len(parts) < 1:
+        return None
+    try:
+        age = int(parts[0])
+        if MIN_AGE <= age <= MAX_AGE:
+            return age
+    except ValueError:
+        pass
+    return None
+
+
 def parse_child_dir(filename: str):
     """
     아동 전용 폴더 파일명 파서.
@@ -157,7 +177,7 @@ def load_dataset(data_dir: str, parser_fn, desc: str = ""):
         return paths, labels
 
     image_files = list(data_path.glob("*.jpg")) + list(data_path.glob("*.png")) \
-                + list(data_path.glob("*.jpeg"))
+                + list(data_path.glob("*.jpeg")) + list(data_path.glob("*.chip.jpg"))
     print(f"[{desc}] 발견된 이미지: {len(image_files)}장")
 
     skipped = 0
@@ -290,7 +310,7 @@ def build_model():
 
 # ── 메인 ─────────────────────────────────────────────────────────────────────
 
-def main(data_dir: str, korean_dir: str, child_dir: str, output_dir: str):
+def main(data_dir: str, korean_dir: str, utkface_dir: str, child_dir: str, output_dir: str):
     print("=" * 60)
     print("나이 인식 모델 학습 시작")
     print("=" * 60)
@@ -300,10 +320,23 @@ def main(data_dir: str, korean_dir: str, child_dir: str, output_dir: str):
 
     if korean_dir:
         kp, kl = load_dataset(korean_dir, parse_aihub_korean, "AI Hub 한국인")
-        # 폴더 구조도 시도
         kp2, kl2 = load_dataset_by_folder(korean_dir, "AI Hub 한국인")
         paths  += kp + kp2
         labels += kl + kl2
+
+    if utkface_dir:
+        # UTKFace 루트와 utkcropped 하위 폴더 모두 시도
+        up, ul = load_dataset(utkface_dir, parse_utkface, "UTKFace")
+        sub = os.path.join(utkface_dir, 'utkcropped')
+        if os.path.isdir(sub):
+            up2, ul2 = load_dataset(sub, parse_utkface, "UTKFace/utkcropped")
+            seen = set(up)
+            for p, l in zip(up2, ul2):
+                if p not in seen:
+                    up.append(p); ul.append(l); seen.add(p)
+        paths  += up
+        labels += ul
+        print(f"[UTKFace] 최종 {len(up):,}장 추가")
 
     if child_dir:
         # 파일명 파싱 먼저
@@ -415,6 +448,10 @@ if __name__ == '__main__':
         help='AI Hub 한국인 얼굴 이미지 폴더 (선택)'
     )
     parser.add_argument(
+        '--utkface_dir', default='',
+        help='UTKFace Cropped 이미지 폴더 (선택). 파일명 형식: 나이_성별_인종_날짜.jpg.chip.jpg'
+    )
+    parser.add_argument(
         '--child_dir', default='',
         help='아동 얼굴 이미지 전용 폴더 (선택). 파일명 또는 하위 폴더명에 나이 포함.'
     )
@@ -424,4 +461,4 @@ if __name__ == '__main__':
         help='학습된 모델 저장 경로'
     )
     args = parser.parse_args()
-    main(args.data_dir, args.korean_dir, args.child_dir, args.output_dir)
+    main(args.data_dir, args.korean_dir, args.utkface_dir, args.child_dir, args.output_dir)
