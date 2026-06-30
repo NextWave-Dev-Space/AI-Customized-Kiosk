@@ -1,140 +1,207 @@
-# app.py code :
+# app.py
+#
+# 사용 기술: Python, Flask, TensorFlow, OpenCV, Haar Cascade, Deep Learning
+#
+# 처리 흐름:
+#   1. POST /predict-age 로 Base64 이미지 수신
+#   2. Haar Cascade(haarcascade_frontalface_alt.xml)로 얼굴 검출
+#   3. MobileNetV2 기반 TensorFlow 모델로 연령대 예측 (7클래스)
+#   4. 클래스를 고령층/청년층 인터페이스로 매핑하여 반환
+#
+# 연령 클래스:
+#   0: 0~9세   → elderly
+#   1: 10~19세 → general
+#   2: 20~29세 → general
+#   3: 30~39세 → general
+#   4: 40~49세 → general
+#   5: 50~59세 → elderly
+#   6: 60세+   → elderly
 
-# 사용된 주요 기능 :
-# Flask : Flask, request, jsonify, CORS
-# OpenCV : cv2.CascadeClassifier, cv2.dnn.readNetFromCaffe, cv2.cvtColor, cv2.imdecode,cv2.dnn.blobFromImage
-# Base64 : base64.b64decode
-# Numpy : np.frombuffer
-
-# 이 코드는 POST 요청을 통해 전송된 이미지를 처리하고, 얼굴을 감지하고, 사전 훈련된 모델을 사용하여 나이를 예측하고, 그 결과를 인터페이스 추천과 함께 반환한다.
-
-
-
-# import 기능 (필수 라이브러리 가져오기)
-from flask import Flask, request, jsonify # Flask, request, jsonify : 웹앱을 만들고, 요청을 처리하고, JSON 응답을 반환함
-import cv2 # 이미지 처리 및 컴퓨터 비전 작업에 사용되는 OpenCV
-import numpy as np # numpy : 수치 연산, 특히 이미지 데이터 조작을 처리
-import base64 # Base64 형식으로 전송된 이미지를 디코딩
-from flask_cors import CORS # CORS : React 프런트엔드와의 상호작용을 위해 교차 출처 리소스 공유를 활성화
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import cv2
+import numpy as np
+import base64
 import logging
-import traceback # logging, traceback : 디버깅 및 오류 로깅을 위해 사용됨
+import traceback
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # TensorFlow 불필요 로그 억제
+import tensorflow as tf
 
-
-# Flask app을 초기화하고 교차 출처 요청에 대해 CORS를 활성화
 app = Flask(__name__)
-CORS(app)  # React frontend에서 교차 오리진 요청 허용
+CORS(app)
 
-
-# console에서 자세한 동작과 오류를 포착하기 위해 디버그 수준으로 logging을 설정
 logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+# ── 경로 설정 ──────────────────────────────────────────────────────────────
+BASE_DIR       = os.path.dirname(os.path.abspath(__file__))
+MODEL_DIR      = os.path.join(BASE_DIR, 'models', 'my_saved_model')
+HAAR_PATH      = os.path.join(MODEL_DIR, 'haarcascade_frontalface_alt.xml')
+AGE_MODEL_H5   = os.path.join(MODEL_DIR, 'age_model.h5')
+AGE_SAVEDMODEL = os.path.join(MODEL_DIR, 'age_savedmodel')
+
+# ── 연령 클래스 정의 ────────────────────────────────────────────────────────
+AGE_CLASSES   = ['0-9세', '10-19세', '20-29세', '30-39세', '40-49세', '50-59세', '60세+']
+AGE_MIDPOINTS = [5, 15, 25, 35, 45, 55, 70]  # 각 클래스의 대표 나이
+
+# 클래스 → 인터페이스 매핑
+# 클래스 0(0~9세): 아동 → 고령층 화면으로 통일
+# 클래스 1~4(10~49세): 청년층
+# 클래스 5~6(50세+): 고령층
+CLASS_TO_INTERFACE = {
+    0: 'elderly',   # 0~9세
+    1: 'general',   # 10~19세
+    2: 'general',   # 20~29세
+    3: 'general',   # 30~39세
+    4: 'general',   # 40~49세
+    5: 'elderly',   # 50~59세
+    6: 'elderly',   # 60세+
+}
+
+IMG_SIZE = 224  # MobileNetV2 입력 크기
 
 
-# model 경로 정의 : 얼굴 감지(Haar Cascade) 및 연령 예측(Caffe 기반 모델)을 위한 사전 학습된 모델로의 경로를 정의
-MODEL_PATH = "models/my_saved_model/"
-HAAR_MODEL_PATH = MODEL_PATH + "haarcascade_frontalface_alt.xml"
-AGE_PROTO_PATH = MODEL_PATH + "deploy_age.prototxt"
-AGE_MODEL_PATH = MODEL_PATH + "age_net.caffemodel"
+# ── 모델 로드 ───────────────────────────────────────────────────────────────
+def load_age_model():
+    """학습된 TensorFlow 나이 인식 모델 로드"""
+    # SavedModel 형식 우선, 없으면 H5
+    if os.path.isdir(AGE_SAVEDMODEL):
+        logger.info(f"SavedModel 로드: {AGE_SAVEDMODEL}")
+        return tf.keras.models.load_model(AGE_SAVEDMODEL)
+    elif os.path.isfile(AGE_MODEL_H5):
+        logger.info(f"H5 모델 로드: {AGE_MODEL_H5}")
+        return tf.keras.models.load_model(AGE_MODEL_H5)
+    else:
+        raise FileNotFoundError(
+            "학습된 모델이 없습니다.\n"
+            "먼저 train_model.py를 실행하여 모델을 학습시켜 주세요.\n"
+            "  python train_model.py --data_dir ../models"
+        )
 
 
-# 얼굴 감지를 위한 Haar Cascade model 로딩
-cascade = cv2.CascadeClassifier(HAAR_MODEL_PATH)
+logger.info("Haar Cascade 얼굴 검출기 로드 중...")
+face_cascade = cv2.CascadeClassifier(HAAR_PATH)
+if face_cascade.empty():
+    raise IOError(f"Haar Cascade 로드 실패: {HAAR_PATH}")
+logger.info("Haar Cascade 로드 완료")
+
+logger.info("나이 인식 모델 로드 중...")
+age_model = load_age_model()
+logger.info("나이 인식 모델 로드 완료")
 
 
-# 연령 예측을 위한 Caffe model 로딩
-age_net = cv2.dnn.readNetFromCaffe(AGE_PROTO_PATH, AGE_MODEL_PATH)
+# ── 예측 함수 ───────────────────────────────────────────────────────────────
+def preprocess_face(face_img: np.ndarray) -> np.ndarray:
+    """얼굴 이미지를 모델 입력 형식으로 전처리"""
+    face_rgb    = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
+    face_resized = cv2.resize(face_rgb, (IMG_SIZE, IMG_SIZE))
+    face_array  = np.expand_dims(face_resized.astype(np.float32), axis=0)
+    return face_array
 
 
-# model 매개변수
-MODEL_MEAN_VALUES = (78.4263377603, 87.7689143744, 114.895847746)  # MODEL_MEAN_VALUES : 모델의 예상 입력과 일치하도록 입력 이미지를 정규화
-age_list = ['(0-2)', '(4-6)', '(8-12)', '(15-20)', '(25-30)', '(31-40)', '(41-100)']  # age_list : 예상 연령대에 해당하는 라벨
-age_ranges = [2, 6, 12, 20, 30, 40, 100]  # age_ranges : 더 쉬운 매핑을 위해 연령대를 숫자로 나타냄
+def predict_age_class(face_img: np.ndarray):
+    """
+    얼굴 이미지에서 연령 클래스와 대표 나이 예측
+    Returns: (class_idx, predicted_age, confidence)
+    """
+    input_tensor = preprocess_face(face_img)
+    predictions  = age_model.predict(input_tensor, verbose=0)[0]  # shape: (7,)
+
+    class_idx    = int(np.argmax(predictions))
+    confidence   = float(predictions[class_idx])
+    predicted_age = AGE_MIDPOINTS[class_idx]
+
+    logger.debug(f"클래스별 확률: {dict(zip(AGE_CLASSES, predictions.tolist()))}")
+    logger.debug(f"예측 클래스: {AGE_CLASSES[class_idx]} (신뢰도: {confidence:.3f})")
+
+    return class_idx, predicted_age, confidence
 
 
-# API 엔드포인트 : 업로드된 이미지를 기반으로 사용자의 연령을 예측하는 POST 엔드포인트를 정의
+# ── API 엔드포인트 ──────────────────────────────────────────────────────────
 @app.route('/predict-age', methods=['POST'])
 def predict_age():
     """
-    업로드된 이미지를 기반으로 사용자의 나이를 예측하는 요청을 처리
+    Base64 인코딩된 이미지를 받아 나이 및 인터페이스 유형을 반환
+
+    Request body (JSON):
+        { "image": "<base64 문자열>" }
+
+    Response (JSON):
+        { "predicted_age": 35, "age_class": "30-39세", "interface": "general", "confidence": 0.91 }
     """
     try:
-        # 들어오는 요청 기록
-        logging.debug(f"Received request: {request.json}")
+        logger.debug("요청 수신")
 
-
-        # 요청 검증 : 요청에 image필드가 있는 JSON이 포함되어 있는지 확인
+        # 요청 검증
         if not request.is_json:
-            logging.error("Request is not in JSON format.")
-            return jsonify({'error': 'Request must be JSON'}), 400
-
-
+            return jsonify({'error': 'Content-Type은 application/json이어야 합니다.'}), 400
         if 'image' not in request.json:
-            logging.error("'image' key not found in the request.")
-            return jsonify({'error': 'No image found in request'}), 400
+            return jsonify({'error': "요청 본문에 'image' 필드가 없습니다."}), 400
 
-
-        # Base64 이미지 디코딩 : Base64 이미지를 NumPy 배열로 디코딩, OpenCV를 사용하여 배열을 이미지로 변환
-        image_data = request.json['image']  # 요청에서 이미지 데이터 추출
-        img_data = base64.b64decode(image_data)  # Base64 문자열을 byte 단위로 디코딩
-        np_arr = np.frombuffer(img_data, np.uint8)  # byte를 NumPy 배열로 변환
-        img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)  # 배열을 이미지로 디코딩
-
+        # Base64 디코딩 → OpenCV 이미지 변환
+        image_data = request.json['image']
+        img_bytes  = base64.b64decode(image_data)
+        np_arr     = np.frombuffer(img_bytes, np.uint8)
+        img        = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
         if img is None:
-            logging.error("Failed to decode image.")
-            return jsonify({'error': 'Invalid image data'}), 400
+            return jsonify({'error': '이미지 디코딩에 실패했습니다.'}), 400
 
+        # 얼굴 검출 (Haar Cascade + 히스토그램 평탄화로 조명 보정)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        gray = cv2.equalizeHist(gray)
 
-        # 얼굴 감지 수행 : 얼굴 감지를 위해 이미지를 회색조로 변환, Haar Cascade 모델을 사용하여 얼굴을 감지
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # 얼굴 감지를 위해 이미지를 grayscale로 변환
-        faces = cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(50, 50))  # 얼굴 감지
-
+        faces = face_cascade.detectMultiScale(
+            gray,
+            scaleFactor=1.1,
+            minNeighbors=5,
+            minSize=(48, 48),
+            flags=cv2.CASCADE_SCALE_IMAGE
+        )
 
         if len(faces) == 0:
-            logging.warning("No face detected.")
-            return jsonify({'error': 'No face detected'}), 400
+            logger.warning("얼굴이 검출되지 않았습니다.")
+            return jsonify({'error': '얼굴이 감지되지 않았습니다.'}), 400
 
+        # 가장 큰 얼굴 선택 (카메라에 가장 가까운 사람)
+        x, y, w, h = sorted(faces, key=lambda f: f[2] * f[3], reverse=True)[0]
 
-        # 처음 발견된 얼굴의 나이 예측 : 첫 번째로 감지된 얼굴을 추출하여 모델 입력을 위한 블롭으로 사전 처리
-        x, y, w, h = faces[0]  # 첫 번째로 감지된 얼굴의 좌표 가져오기
-        face = img[y:y + h, x:x + w]  # 얼굴 영역 자르기
-        blob = cv2.dnn.blobFromImage(face, 1, (227, 227), MODEL_MEAN_VALUES, swapRB=False)  # 얼굴 영역 전처리
+        # 얼굴 영역에 여백 추가
+        margin = int(min(w, h) * 0.1)
+        x1 = max(0, x - margin)
+        y1 = max(0, y - margin)
+        x2 = min(img.shape[1], x + w + margin)
+        y2 = min(img.shape[0], y + h + margin)
+        face_crop = img[y1:y2, x1:x2]
 
+        # 나이 예측
+        class_idx, predicted_age, confidence = predict_age_class(face_crop)
+        interface = CLASS_TO_INTERFACE[class_idx]
 
-        # 연령 예측 수행 : Caffe 모델을 사용하여 연령을 예측하고 해당 연령 범위에 매핑
-        age_net.setInput(blob)
-        age_preds = age_net.forward()  # 연령 네트워크를 통한 전방 통과
-        age_index = age_preds.argmax()  # 최고 confidence 지수 얻기
-        predicted_age = age_ranges[age_index]  # 연령대별 map index
+        logger.info(
+            f"예측 완료 — 연령대: {AGE_CLASSES[class_idx]}, "
+            f"대표 나이: {predicted_age}, 인터페이스: {interface}, "
+            f"신뢰도: {confidence:.3f}"
+        )
 
+        return jsonify({
+            'predicted_age': predicted_age,
+            'age_class':     AGE_CLASSES[class_idx],
+            'interface':     interface,
+            'confidence':    round(confidence, 3)
+        }), 200
 
-        # 비현실적인 연령 예측을 위한 fallback : 예측된 연령이 현실적인 범위를 벗어나는 예외적인 사례를 처리
-        if predicted_age < 0 or predicted_age > 100:
-            logging.warning("Unrealistic age detected, defaulting to elderly interface.")
-            predicted_age = 100  # 100세 이상이면 고령층용 인터페이스
-
-
-        logging.debug(f"Final Predicted Age: {predicted_age}")
-
-
-        # 예상 연령에 따라 redirect : 예측된 연령을 적합한 인터페이스( elderly, children, 또는 general)에 매핑
-        if predicted_age >= 50:  # 50세 이상 고령층용 인터페이스
-            logging.info("User identified as elderly, directing to elderly interface.")
-            return jsonify({'predicted_age': predicted_age, 'interface': 'elderly'}), 200
-        elif predicted_age < 10:  # 10세 미만 아동용 인터페이스
-            logging.info("User identified as child, directing to children interface.")
-            return jsonify({'predicted_age': predicted_age, 'interface': 'children'}), 200
-        else:  # 10세 이상~50세 미만을 위한 청년층 인터페이스
-            logging.info("User identified as young, directing to general interface.")
-            return jsonify({'predicted_age': predicted_age, 'interface': 'general'}), 200
-
-
-    # 오류 처리 : 문제가 발생하면 오류를 기록하고 반환
     except Exception as e:
-        logging.error(f"Error occurred: {traceback.format_exc()}")
-        return jsonify({'error': 'An internal error occurred'}), 500
+        logger.error(traceback.format_exc())
+        return jsonify({'error': '서버 내부 오류가 발생했습니다.'}), 500
 
 
-# Flask App 실행 : Flask 앱을 ​​시작하여 포트 5000에서 접근할 수 있도록 합니다.
+@app.route('/health', methods=['GET'])
+def health():
+    """서버 상태 확인"""
+    return jsonify({'status': 'ok', 'model': 'MobileNetV2-AgeClassifier'}), 200
+
+
 if __name__ == '__main__':
-    # port 5000에서 Flask app 실행
-    app.run(host='0.0.0.0', port=5000, debug=True)  # 모든 network 인터페이스에서 host
+    app.run(host='0.0.0.0', port=5000, debug=True)
