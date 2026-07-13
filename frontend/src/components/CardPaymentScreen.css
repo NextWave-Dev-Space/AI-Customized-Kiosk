@@ -39,6 +39,13 @@
   margin-top: 220px;
 }
 
+.cardpayment-error-message {
+  color: #E02020;
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
 /* 카드 결제 control container */
 .card-payment-controls {
   margin-top: 50px;

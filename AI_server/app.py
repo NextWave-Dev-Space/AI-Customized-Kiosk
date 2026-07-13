@@ -28,8 +28,13 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # TensorFlow 불필요 로그 억제
 import tensorflow as tf
 
+# 개인정보(얼굴 이미지) 보호: 허용된 프론트엔드 origin에서만 요청 가능하도록 제한
+ALLOWED_ORIGINS = os.environ.get(
+    'ALLOWED_ORIGINS', 'http://localhost:3000'
+).split(',')
+
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=ALLOWED_ORIGINS)
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -64,14 +69,27 @@ IMG_SIZE = 224  # MobileNetV2 입력 크기
 
 # ── 모델 로드 ───────────────────────────────────────────────────────────────
 def load_age_model():
-    """학습된 TensorFlow 나이 인식 모델 로드"""
+    """학습된 TensorFlow 나이 인식 모델 로드 (비-ASCII 경로 우회를 위해 임시 경로 경유)"""
+    import shutil
+    import tempfile
+
     # SavedModel 형식 우선, 없으면 H5
     if os.path.isdir(AGE_SAVEDMODEL):
         logger.info(f"SavedModel 로드: {AGE_SAVEDMODEL}")
-        return tf.keras.models.load_model(AGE_SAVEDMODEL)
+        tmp_dir = tempfile.mkdtemp()
+        tmp_sm = os.path.join(tmp_dir, "age_savedmodel")
+        shutil.copytree(AGE_SAVEDMODEL, tmp_sm)
+        model = tf.keras.models.load_model(tmp_sm)
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+        return model
     elif os.path.isfile(AGE_MODEL_H5):
         logger.info(f"H5 모델 로드: {AGE_MODEL_H5}")
-        return tf.keras.models.load_model(AGE_MODEL_H5)
+        tmp_dir = tempfile.mkdtemp()
+        tmp_h5 = os.path.join(tmp_dir, "age_model.h5")
+        shutil.copy2(AGE_MODEL_H5, tmp_h5)
+        model = tf.keras.models.load_model(tmp_h5)
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+        return model
     else:
         raise FileNotFoundError(
             "학습된 모델이 없습니다.\n"
@@ -80,8 +98,20 @@ def load_age_model():
         )
 
 
+def load_face_cascade():
+    """OpenCV는 비-ASCII(한글) 경로를 읽지 못하므로 임시 경로로 복사 후 로드."""
+    import shutil
+    import tempfile
+    tmp_dir = tempfile.mkdtemp()
+    tmp_haar = os.path.join(tmp_dir, "haarcascade_frontalface_alt.xml")
+    shutil.copy2(HAAR_PATH, tmp_haar)
+    cascade = cv2.CascadeClassifier(tmp_haar)
+    shutil.rmtree(tmp_dir, ignore_errors=True)
+    return cascade
+
+
 logger.info("Haar Cascade 얼굴 검출기 로드 중...")
-face_cascade = cv2.CascadeClassifier(HAAR_PATH)
+face_cascade = load_face_cascade()
 if face_cascade.empty():
     raise IOError(f"Haar Cascade 로드 실패: {HAAR_PATH}")
 logger.info("Haar Cascade 로드 완료")
@@ -185,12 +215,18 @@ def predict_age():
             f"신뢰도: {confidence:.3f}"
         )
 
-        return jsonify({
+        result = {
             'predicted_age': predicted_age,
             'age_class':     AGE_CLASSES[class_idx],
             'interface':     interface,
             'confidence':    round(confidence, 3)
-        }), 200
+        }
+
+        # 개인정보(얼굴 이미지) 최소 보유 원칙: 응답 생성 직후 이미지 관련 지역 변수를
+        # 명시적으로 폐기하여, 이후 예외가 나더라도 콜스택에 이미지 데이터가 남지 않도록 한다.
+        del image_data, img_bytes, np_arr, img, gray, face_crop
+
+        return jsonify(result), 200
 
     except Exception as e:
         logger.error(traceback.format_exc())
@@ -204,4 +240,9 @@ def health():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # 개인정보(얼굴 이미지) 보호: 운영 환경에서 디버그 모드가 켜져 있으면
+    # 예외 발생 시 Werkzeug 인터랙티브 디버거가 요청 변수(이미지 base64 포함)를
+    # 브라우저에 그대로 노출할 수 있으므로 기본값은 반드시 False로 둔다.
+    debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    host = os.environ.get('FLASK_HOST', '127.0.0.1')
+    app.run(host=host, port=5000, debug=debug_mode)

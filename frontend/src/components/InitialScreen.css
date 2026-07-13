@@ -128,36 +128,18 @@
 }
 */
 
-/* Responsive adjustments for iPad and similar-sized devices */
-@media (max-width: 768px) {
-    .initial-main-heading {
-        font-size: 5rem;
-    }
+/* KioskStage가 항상 768x1024 고정 박스 안에서 렌더링을 보장하므로
+   실제 기기 뷰포트 너비 기준 media query는 기기마다 다른 결과를 만들어 제거함. */
 
-    .initial-subtext {
-        font-size: 1.5rem;
-    }
-
-    .initial-instruction-text-container {
-        font-size: 1.25rem;
-        padding: 8px;
-    }
-}
-
-/* Responsive adjustments for smaller screens like phones */
-@media (max-width: 480px) {
-    .initial-main-heading {
-        font-size: 4rem;
-    }
-
-    .initial-subtext {
-        font-size: 1.25rem;
-    }
-
-    .initial-instruction-text-container {
-        font-size: 1rem;
-        padding: 6px;
-    }
+.initial-privacy-policy-link {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-bottom: 10px;
+    padding: 4px;
 }
 
 

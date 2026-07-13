@@ -7,7 +7,12 @@ import './PaymentCompletionScreen.css';
 const PaymentCompletionScreen = () => {
   const [countdown, setCountdown] = useState(10);
   const [receiptPrinted, setReceiptPrinted] = useState(false);
+  const [orderId, setOrderId] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    setOrderId(sessionStorage.getItem('kiosk_last_order_id'));
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -24,7 +29,9 @@ const PaymentCompletionScreen = () => {
   return (
     <div className="general-payment-completion-screen">
       <h1>결제가<br />완료되었습니다!</h1>
-      <div className="general-payment-completion-order-number">주문번호 : 001</div>
+      <div className="general-payment-completion-order-number">
+        주문번호 : {orderId ?? '-'}
+      </div>
       <button
         className="general-payment-completion-receipt-button"
         onClick={() => setReceiptPrinted(true)}

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -69,6 +69,14 @@ const FaceRecognition = () => {
       }
     };
 
+    const stopCamera = () => {
+      const video = videoRef.current;
+      if (video?.srcObject) {
+        (video.srcObject as MediaStream).getTracks().forEach((t) => t.stop());
+        video.srcObject = null;
+      }
+    };
+
     const captureImage = (): string | null => {
       const video = videoRef.current;
       if (!video || video.videoWidth === 0) return null;
@@ -104,6 +112,11 @@ const FaceRecognition = () => {
       }
 
       if (predictions.length === 0) return;
+
+      // 나이 판별이 끝났으므로 더 이상 촬영이 필요 없음 → 카메라 즉시 종료(개인정보 최소 보유)
+      stopCamera();
+      clearInterval(detectionInterval);
+
       const averageAge = Math.round(predictions.reduce((s, a) => s + a, 0) / predictions.length);
       setPredictedAge(averageAge);
 
@@ -129,10 +142,7 @@ const FaceRecognition = () => {
     loadModelAndStart();
 
     return () => {
-      const video = videoRef.current;
-      if (video?.srcObject) {
-        (video.srcObject as MediaStream).getTracks().forEach((t) => t.stop());
-      }
+      stopCamera();
       clearInterval(detectionInterval);
       clearTimeout(timeoutId);
     };
@@ -140,16 +150,19 @@ const FaceRecognition = () => {
 
   return (
     <div className="face-recognition-screen">
-      <h1 className="facerecognition-main-heading-Face">AI媛 ?쇨뎬?몄떇???쒖옉?⑸땲??</h1>
+      <h1 className="facerecognition-main-heading-Face">AI가 얼굴인식을 시작합니다</h1>
       <div className="facerecognition-video-container">
         <video ref={videoRef} className="facerecognition-video" playsInline />
         <canvas ref={canvasRef} className="facerecognition-video-canvas" />
-        <div className="facerecognition-overlay-text">移대찓??湲곕뒫</div>
+        <div className="facerecognition-overlay-text">카메라 기능</div>
       </div>
-      <p className="facerecognition-instruction-text">?붾㈃???좎떆 ?묒떆??二쇱꽭??</p>
+      <p className="facerecognition-privacy-notice">
+        촬영된 얼굴 이미지는 연령대 추정에만 사용되며, 어디에도 저장되지 않고 그 즉시 폐기됩니다.
+      </p>
+      <p className="facerecognition-instruction-text">화면을 잠시 응시해주세요</p>
       {showRecognition && (
         <div className="facerecognition-recognition-popup">
-          ?몄떇???꾨즺?덉뒿?덈떎.<br />?좎떆留?湲곕떎?ㅼ＜?몄슂.
+          인식이 완료되었습니다.<br />잠시만 기다려주세요.
         </div>
       )}
     </div>

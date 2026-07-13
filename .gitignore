@@ -4,9 +4,24 @@ __pycache__/
 venv/
 AI_server/venvs/
 .env
+.env.local
 .DS_Store
 *.log
+training_log.txt
 .metadata/
 .idea/
 .vscode/
 *.swp
+
+# 대용량 학습 데이터셋 (별도 관리, 저장소에 커밋하지 않음)
+models/UTKFace/
+AI_server/models/my_saved_model/training_state.json
+
+# Next.js 빌드 산출물
+frontend/.next/
+frontend/tsconfig.tsbuildinfo
+frontend/next-env.d.ts
+
+# Gradle 빌드 산출물
+backend/build/
+backend/.gradle/

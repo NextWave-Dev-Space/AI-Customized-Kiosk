@@ -34,8 +34,9 @@ public class Order {
 
     private Integer discountAmount = 0;
 
+    // "PENDING"(결제 대기) → "DONE"(결제 승인 완료) | "FAILED"(결제 실패)
     @Column(nullable = false)
-    private String status = "COMPLETED";
+    private String status = "PENDING";
 
     @Column(nullable = false)
     private LocalDateTime orderedAt = LocalDateTime.now();

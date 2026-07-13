@@ -59,6 +59,13 @@ const InitialScreen = () => {
         </button>
         <button className="initial-transparent-button" onClick={() => {}}></button>
       </div>
+
+      <button
+        className="initial-privacy-policy-link"
+        onClick={() => router.push('/privacy-policy')}
+      >
+        개인정보처리방침 보기
+      </button>
     </div>
   );
 };

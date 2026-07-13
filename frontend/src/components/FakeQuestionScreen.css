@@ -72,24 +72,5 @@
     color: white; /* Fix the hover color for both buttons */
 }
 
-@media (max-width: 768px) {
-    .fake-question-title {
-        font-size: 2.5rem; /* Reduce heading size for smaller screens */
-    }
-
-    .question-option-button, .question-help-button {
-        width: 90%; /* Adjust width for smaller screens */
-        font-size: 1.5rem; /* Smaller font size on mobile */
-    }
-}
-
-@media (max-width: 480px) {
-    .fake-question-title {
-        font-size: 2rem; /* Further reduce heading size */
-    }
-
-    .question-option-button, .question-help-button {
-        width: 100%; /* Full width buttons on small screens */
-        font-size: 1.2rem;
-    }
-}
+/* KioskStage가 항상 768x1024 고정 박스 안에서 렌더링을 보장하므로
+   실제 기기 뷰포트 너비 기준 media query는 기기마다 다른 결과를 만들어 제거함. */

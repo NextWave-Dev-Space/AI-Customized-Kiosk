@@ -58,6 +58,17 @@
     font-weight: bold;
 }
 
+.facerecognition-privacy-notice {
+    font-size: 1.1rem;
+    color: #666;
+    background-color: #F5F5F5;
+    border-radius: 8px;
+    padding: 10px 20px;
+    margin: 0 auto 10px;
+    max-width: 90%;
+    line-height: 1.4;
+}
+
 .facerecognition-instruction-text {
     font-size: 2rem;
     color: black;

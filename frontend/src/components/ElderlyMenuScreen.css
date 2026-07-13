@@ -45,7 +45,7 @@
     margin-left: 450px;
     margin-bottom: -100px;
     margin-top: -40px;
-    
+
 }
 
 .ElderlyMenu-menu-home-button {
@@ -219,8 +219,9 @@
 }
 
 .ElderlyMenu-menu-order-summary-header {
-    display: flex;
-    justify-content: space-around;
+    display: grid;
+    grid-template-columns: 1fr 70px 110px;
+    align-items: center;
     background-color: #E6F9EC;
     padding: 15px 20px;
     border-radius: 10px 10px 0 0;
@@ -228,6 +229,14 @@
     font-weight: bold;
     color: #00BA3C;
     border-bottom: 0.5px solid #00BA3C;
+}
+
+.ElderlyMenu-menu-order-summary-header span:nth-child(2) {
+    text-align: center;
+}
+
+.ElderlyMenu-menu-order-summary-header span:nth-child(3) {
+    text-align: right;
 }
 
 .ElderlyMenu-menu-order-summary-line {
@@ -253,18 +262,40 @@
 }
 
 .ElderlyMenu-menu-order-item {
-    display: flex;
-    justify-content: space-around;
+    display: grid;
+    grid-template-columns: 1fr 70px 110px;
+    align-items: center;
     padding: 20px 0; /* Added more space between items */
     border-bottom: 0.5px solid #00BA3C;
     font-weight: bold;
     font-size: 1.3rem !important; /* Increase font size */
 }
 
+.ElderlyMenu-menu-order-item span:first-child {
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 10px;
+}
+
+.ElderlyMenu-menu-order-item span:nth-child(2) {
+    text-align: center;
+}
+
+.ElderlyMenu-menu-order-item span:nth-child(3) {
+    text-align: right;
+}
+
 /* Increase font size for individual elements inside .order-item */
 .ElderlyMenu-menu-order-item span, .ElderlyMenu-menu-order-item div {
     font-size: 1.3rem !important;
     color: black; /* Optional: Ensure color is clearly visible */
+}
+
+.ElderlyMenu-menu-order-item.empty-space {
+    grid-template-columns: 1fr;
+    justify-items: center;
 }
 
 .ElderlyMenu-menu-cancel-all-button {
@@ -298,12 +329,11 @@
     background-color: #F01D00;
 }
 
-/* Ensure buttons are visible on the iPad screen */
-@media (max-width: 1024px) {
-    .ElderlyMenu-menu-screen {
-        height: auto;
-        padding-bottom: 100px; /* Ensure buttons are not cut off */
-    }
+/* KioskStage가 항상 고정 박스 크기로 렌더링을 보장하므로 실제 기기 뷰포트 기준 media query 제거.
+   버튼이 잘리지 않도록 항상 적용되어야 하는 스타일이면 기본 규칙으로 옮길 것. */
+.ElderlyMenu-menu-screen {
+    height: auto;
+    padding-bottom: 100px;
 }
 
 

@@ -24,3 +24,9 @@ server:
 logging:
   level:
     com.kiosk: DEBUG
+
+toss:
+  # 토스페이먼츠 개발자센터(https://developers.tosspayments.com)에서 회원가입 후
+  # 발급받은 "테스트 시크릿 키"를 TOSS_SECRET_KEY 환경변수로 주입하세요.
+  # 사업자등록/계좌 연동 없이 무료로 발급되며, 실제 결제는 발생하지 않습니다.
+  secret-key: ${TOSS_SECRET_KEY:}

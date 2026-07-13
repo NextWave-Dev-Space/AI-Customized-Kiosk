@@ -55,8 +55,11 @@ FINETUNE_LR     = 1e-5
 NUM_CLASSES     = 7
 MIN_AGE, MAX_AGE = 0, 100
 
-# 아동(0)·고령(5,6) 클래스는 데이터가 적으므로 가중치 2배 부스팅
-MINORITY_BOOST = {0: 2.0, 5: 1.5, 6: 2.0}
+# 아동(0)·고령(5,6) 클래스는 데이터가 적으므로 가중치 부스팅
+# 30-39세(3)·40-49세(4)는 고령 클래스 부스팅에 밀려 오분류가 많으므로 보정치 추가
+MINORITY_BOOST = {0: 2.0, 3: 1.4, 4: 1.8, 5: 1.3, 6: 1.7}
+# 30-39/40-49 클래스는 학습 시 샘플을 반복 노출시켜(오버샘플링) 경계 학습을 강화
+OVERSAMPLE_FACTOR = {3: 1.5, 4: 2.0}
 # ────────────────────────────────────────────────────────────────────────────
 
 AGE_BINS = [0, 10, 20, 30, 40, 50, 60, 101]  # 7개 구간 경계
@@ -379,13 +382,28 @@ def main(data_dir: str, korean_dir: str, utkface_dir: str, child_dir: str,
     )
     print(f"[분할] 학습: {len(train_p):,}  검증: {len(val_p):,}  테스트: {len(test_p):,}")
 
-    # 3. tf.data 파이프라인
+    # 3. 클래스 가중치 (원본 분포 기준, 아동·고령 클래스 부스팅 포함)
+    class_weights = compute_class_weights(train_l)
+
+    # 3-1. 30-39/40-49 오버샘플링 (고령 부스팅에 밀려 오분류되는 경계 클래스 보강)
+    if OVERSAMPLE_FACTOR:
+        extra_p, extra_l = [], []
+        for cls, factor in OVERSAMPLE_FACTOR.items():
+            idx = [i for i, l in enumerate(train_l) if l == cls]
+            n_extra = int(len(idx) * (factor - 1.0))
+            if n_extra > 0:
+                chosen = np.random.choice(idx, size=n_extra, replace=True)
+                extra_p.extend(train_p[i] for i in chosen)
+                extra_l.extend(train_l[i] for i in chosen)
+        if extra_p:
+            print(f"[오버샘플링] 추가 샘플: {len(extra_p):,}장")
+            train_p = train_p + extra_p
+            train_l = train_l + extra_l
+
+    # 4. tf.data 파이프라인
     train_ds = create_tf_dataset(train_p, train_l, augment=True)
     val_ds   = create_tf_dataset(val_p,   val_l,   augment=False)
     test_ds  = create_tf_dataset(test_p,  test_l,  augment=False)
-
-    # 4. 클래스 가중치 (아동·고령 클래스 부스팅 포함)
-    class_weights = compute_class_weights(train_l)
 
     # 5. 출력 경로 및 상태 파일 설정
     out_path = Path(output_dir)
@@ -410,7 +428,12 @@ def main(data_dir: str, korean_dir: str, utkface_dir: str, child_dir: str,
     # 7. 모델 구성 또는 로드
     if resume:
         print("[Resume] 저장된 모델 로드 중...")
-        model = tf.keras.models.load_model(h5_path)
+        import shutil, tempfile
+        tmp_dir = tempfile.mkdtemp()
+        tmp_h5 = os.path.join(tmp_dir, "age_model.h5")
+        shutil.copy2(h5_path, tmp_h5)
+        model = tf.keras.models.load_model(tmp_h5)
+        shutil.rmtree(tmp_dir, ignore_errors=True)
         # base_model 참조 추출 (Phase 2 fine-tuning 시 필요)
         base_model = next(l for l in model.layers if isinstance(l, tf.keras.Model))
         print(f"[Resume] 모델 로드 완료 (파라미터: {model.count_params():,})")
@@ -477,9 +500,21 @@ def main(data_dir: str, korean_dir: str, utkface_dir: str, child_dir: str,
     print(f"  정확도: {acc*100:.2f}%  Top-2 정확도: {top2*100:.2f}%")
 
     # ── 저장 ─────────────────────────────────────────────────────────────
-    model.save(h5_path)
+    import shutil, tempfile
+    # H5 저장: 임시 경로 경유 (한국어 경로 TF 버그 우회)
+    tmp_dir = tempfile.mkdtemp()
+    tmp_h5 = os.path.join(tmp_dir, "age_model.h5")
+    model.save(tmp_h5)
+    shutil.copy2(tmp_h5, h5_path)
+
+    # SavedModel 저장: 임시 경로에 저장 후 이동
+    tmp_sm = os.path.join(tmp_dir, "age_savedmodel")
+    model.save(tmp_sm, save_format='tf')
     saved_model_path = str(out_path / "age_savedmodel")
-    model.save(saved_model_path, save_format='tf')
+    if os.path.exists(saved_model_path):
+        shutil.rmtree(saved_model_path)
+    shutil.copytree(tmp_sm, saved_model_path)
+    shutil.rmtree(tmp_dir, ignore_errors=True)
 
     print(f"\n[저장 완료]")
     print(f"  H5 모델      : {h5_path}")

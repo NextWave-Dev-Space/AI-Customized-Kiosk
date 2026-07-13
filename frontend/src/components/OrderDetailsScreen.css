@@ -22,8 +22,9 @@
 
 
 .orderdetails-order-summary-header {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 80px 130px;
+  align-items: center;
   background-color: #FF428C;
   padding: 18px;
   height: 100%;
@@ -39,14 +40,22 @@
   box-shadow: none; /* Removes any shadow that might appear as a line */
 }
 
+.orderdetails-order-summary-header span:nth-child(2) {
+  text-align: center;
+}
+
+.orderdetails-order-summary-header span:nth-child(3) {
+  text-align: right;
+}
+
 
 
 
 /* Individual order item */
 .orderdetails-order-item {
-  display: flex;
-  justify-content: space-between; /* Distribute items evenly */
-  align-items: center; /* Aligns content vertically */
+  display: grid;
+  grid-template-columns: 1fr 80px 130px;
+  align-items: center;
   padding: 10px;
   font-size: 1.5rem;
   background-color: #FFEDF4; /* Keeps the tab background color */
@@ -55,6 +64,27 @@
   margin: 0 auto; /* Center the entire item within the container */
   border-radius: 10px;
   font-weight: bold;
+}
+
+.orderdetails-order-item span:first-child {
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 10px;
+}
+
+.orderdetails-order-item span:nth-child(2) {
+  text-align: center;
+}
+
+.orderdetails-order-item span:nth-child(3) {
+  text-align: right;
+}
+
+.orderdetails-order-item.empty-space {
+  grid-template-columns: 1fr;
+  justify-items: center;
 }
 
 

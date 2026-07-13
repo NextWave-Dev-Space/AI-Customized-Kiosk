@@ -175,7 +175,13 @@ const GeneralMenuScreen = () => {
                 {selectedCategory === 'new' && <span className="generalmenu-new-label">NEW</span>}
                 {item.best && <span className="generalmenu-best-label">BEST</span>}
               </div>
-              <div className="generalmenu-menu-name">{item.name}</div>
+              <div className="generalmenu-menu-name">
+                {item.name.split('\n').map((line, lineIdx) => (
+                  <div key={lineIdx} className={lineIdx === 0 ? 'generalmenu-menu-name-ko' : 'generalmenu-menu-name-en'}>
+                    {line}
+                  </div>
+                ))}
+              </div>
               <div className="generalmenu-menu-price">₩{item.price.toLocaleString()}</div>
             </div>
           ))}

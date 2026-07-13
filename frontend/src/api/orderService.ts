@@ -14,6 +14,17 @@ export const getOrderDetails = async (orderId: number): Promise<OrderResponse> =
   return response.data;
 };
 
+export interface ConfirmPaymentRequest {
+  paymentKey: string;
+  orderId: string;
+  amount: number;
+}
+
+export const confirmPayment = async (data: ConfirmPaymentRequest): Promise<OrderResponse> => {
+  const response = await axios.post<OrderResponse>(`${API_BASE_URL}/payments/confirm`, data);
+  return response.data;
+};
+
 export const getMenuItems = async (category?: string): Promise<MenuItem[]> => {
   const url = category
     ? `${API_BASE_URL}/menus?category=${category}`

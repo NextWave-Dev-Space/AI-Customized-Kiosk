@@ -1,0 +1,45 @@
+.payment-success-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+    background-color: #fff;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid #FF428C;
+    border-radius: 15px;
+    box-sizing: border-box;
+    margin: 20px;
+}
+
+.payment-success-loading-title {
+    font-size: 2.2rem;
+    color: #FF428C;
+    font-weight: bold;
+}
+
+.payment-success-error-title {
+    font-size: 2.2rem;
+    color: #E02020;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.payment-success-error-message {
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 40px;
+}
+
+.payment-success-home-button {
+    padding: 20px 50px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background-color: #FF428C;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
