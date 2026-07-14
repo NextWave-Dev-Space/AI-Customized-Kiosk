@@ -6,6 +6,8 @@ import com.kiosk.backend.entity.Order;
 import com.kiosk.backend.entity.OrderItem;
 import com.kiosk.backend.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,9 +57,7 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<OrderResponse> getAllOrders() {
-        return orderRepository.findAll().stream()
-                .map(OrderResponse::new)
-                .collect(Collectors.toList());
+    public Page<OrderResponse> getAllOrders(Pageable pageable) {
+        return orderRepository.findAll(pageable).map(OrderResponse::new);
     }
 }

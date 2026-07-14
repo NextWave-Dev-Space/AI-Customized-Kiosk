@@ -13,6 +13,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
+        # 지연로딩 컬렉션(Order.items 등)을 N개의 개별 쿼리 대신 IN절로 묶어 배치 조회 -> N+1 방지
+        default_batch_fetch_size: 100
 
   sql:
     init:

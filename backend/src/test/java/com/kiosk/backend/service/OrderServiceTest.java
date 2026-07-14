@@ -11,6 +11,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -126,12 +130,14 @@ class OrderServiceTest {
         order2.setPaymentMethod("pay");
         order2.setTotalAmount(2000);
 
-        when(orderRepository.findAll()).thenReturn(List.of(order1, order2));
+        Pageable pageable = PageRequest.of(0, 20);
+        when(orderRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(order1, order2), pageable, 2));
 
-        List<OrderResponse> responses = orderService.getAllOrders();
+        Page<OrderResponse> responses = orderService.getAllOrders(pageable);
 
-        assertThat(responses).hasSize(2);
-        assertThat(responses.get(0).getId()).isEqualTo(1L);
-        assertThat(responses.get(1).getId()).isEqualTo(2L);
+        assertThat(responses.getContent()).hasSize(2);
+        assertThat(responses.getTotalElements()).isEqualTo(2);
+        assertThat(responses.getContent().get(0).getId()).isEqualTo(1L);
+        assertThat(responses.getContent().get(1).getId()).isEqualTo(2L);
     }
 }

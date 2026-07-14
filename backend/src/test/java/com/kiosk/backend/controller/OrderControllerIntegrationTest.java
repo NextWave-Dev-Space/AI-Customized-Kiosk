@@ -120,6 +120,22 @@ class OrderControllerIntegrationTest {
 
         mockMvc.perform(get("/api/orders"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.totalElements").value(2));
+    }
+
+    @Test
+    void getAllOrders_respectsPageSizeParameter() throws Exception {
+        for (int i = 0; i < 3; i++) {
+            mockMvc.perform(post("/api/orders")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(validOrderPayload())));
+        }
+
+        mockMvc.perform(get("/api/orders").param("size", "2").param("page", "0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.totalPages").value(2));
     }
 }

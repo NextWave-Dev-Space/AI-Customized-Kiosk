@@ -169,6 +169,13 @@
   font-weight: bold;
 }
 
+.barcodescanner-error-message {
+  color: #E02020;
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
 /* 팝업 메시지를 위한 추가 스타일링 */
 .barcodescannerscreen-scanner-employee-popup-message {
   font-weight: bold;
