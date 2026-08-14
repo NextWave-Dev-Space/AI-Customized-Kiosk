@@ -1,0 +1,27 @@
+# 로컬 개발용 MySQL 컨테이너.
+# Windows MySQL 서비스 설치/권한 문제를 피하기 위해 도입했습니다.
+# 시작: docker compose up -d
+# 중지: docker compose down
+# 데이터까지 삭제: docker compose down -v
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: kiosk-mysql
+    restart: unless-stopped
+    environment:
+      # backend/src/main/resources/application.yml 의 MYSQL_PASSWORD 환경변수와 동일하게 맞춰주세요.
+      MYSQL_ROOT_PASSWORD: admin1234
+      MYSQL_DATABASE: kiosk_db
+      TZ: Asia/Seoul
+    ports:
+      - "3306:3306"
+    volumes:
+      - kiosk-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-padmin1234"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  kiosk-mysql-data:

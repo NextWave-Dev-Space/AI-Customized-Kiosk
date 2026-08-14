@@ -3,9 +3,9 @@
 .initial-screen {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
-    height: 90vh; 
+    height: 97%; /* KioskStage 고정 박스(768x1024) 기준 비율 */
     background-color: #fff;
     font-family: Arial, sans-serif;
     padding: 20px;
@@ -18,13 +18,12 @@
 
 /* Main heading for the top text */
 .initial-main-heading {
-    font-size: 5rem !important; 
+    font-size: 5rem !important;
     font-weight: bold;
-    color: #FF428C; 
+    color: #FF428C;
     text-align: center;
-    line-height: 1.1; 
-    margin-bottom: 0px; 
-    margin-top: 60px;
+    line-height: 1.1;
+    margin: 40px 0 0;
 }
 
 /* Styling for the subtext */
@@ -32,8 +31,7 @@
     font-size: 3rem;
     font-weight: bold;
     color: black;
-    margin-bottom: 150px;
-    margin-top: -70px;
+    margin: 20px 0;
 }
 
 .initial-subtext .initial-highlight {
@@ -49,15 +47,14 @@
     border-radius: 10px;
     padding: 20px 120px;
     display: inline-block;
-    margin-top: -200px;
-    margin-bottom: -50px;
+    margin: 20px auto;
 }
 
 .initial-instruction-text {
     font-size: 2rem;
     font-weight: bold;
     color: #FF428C !important;
-    margin-top: 30px;
+    margin: 0;
 }
 
 /* Adjust the button container to add more space between the buttons */
@@ -73,7 +70,7 @@
 
 /* General Public button styling remains the same */
 .initial-option-button {
-    width: 80%; 
+    width: 80%;
     padding: 40px 0;
     font-size: 2.5rem !important;
     font-weight: bold;
@@ -82,13 +79,12 @@
     border: none;
     cursor: pointer;
     border-radius: 8px;
-    margin-top: -30px;
     line-height: 1.5;
 }
 
 /* General Public button styling remains the same */
 .initial-option-button-2 {
-    width: 80%; 
+    width: 80%;
     padding: 20px 0;
     font-size: 2.5rem !important;
     font-weight: bold;
@@ -97,7 +93,6 @@
     border: none;
     cursor: pointer;
     border-radius: 8px;
-    margin-bottom: -160px;
     line-height: 1.5;
 }
 
@@ -135,11 +130,12 @@
     background: none;
     border: none;
     color: #999;
-    font-size: 0.9rem;
+    font-size: 1.4rem;
     text-decoration: underline;
     cursor: pointer;
+    margin-top: 30px;
     margin-bottom: 10px;
-    padding: 4px;
+    padding: 8px;
 }
 
 

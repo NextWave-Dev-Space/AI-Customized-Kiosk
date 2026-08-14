@@ -3,7 +3,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 90vh;
+    height: 97%; /* KioskStage 고정 박스(768x1024) 기준 비율 */
     background-color: #fff;
     font-family: Arial, sans-serif;
     padding: 20px;
@@ -65,7 +65,9 @@
     border-radius: 8px;
     padding: 10px 20px;
     margin: 0 auto 10px;
-    max-width: 90%;
+    width: 90%; /* 위쪽 카메라 영역(.facerecognition-video-container)과 가로 길이 통일 */
+    max-width: 900px;
+    box-sizing: border-box;
     line-height: 1.4;
 }
 
@@ -83,22 +85,21 @@
     text-align: center;
     visibility: visible;
     position: absolute; /* Use absolute to position it precisely */
-    bottom: 10px; /* Stick it at the bottom of the screen */
-    left: 50%; 
+    bottom: 15px; /* Stick it closer to the bottom of the screen */
+    left: 50%;
     transform: translateX(-50%); /* Center horizontally */
     z-index: 10; /* Ensure visibility over other elements */
-    margin-bottom: 30px;
 }
 
 .facerecognition-recognition-popup {
     position: absolute;
-    top: 10%; /* Move the popup higher on the screen */
+    top: 50%;
     left: 50%;
-    transform: translate(-50%, 0); /* Remove vertical centering */
+    transform: translate(-50%, -50%); /* 화면 정중앙에 배치 */
     background-color: #FF428C;
     color: white;
     padding: 40px 60px; /* Increased padding to expand the size */
-    width: 40%; /* Increase the width to make the popup wider */
+    width: 70%; /* Increase the width to make the popup wider */
     font-size: 2rem; /* Larger font size for better readability */
     font-weight: bold;
     border-radius: 15px; /* Increased border radius for smoother corners */

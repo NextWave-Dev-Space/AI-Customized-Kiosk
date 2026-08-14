@@ -5,7 +5,7 @@
   border-radius: 15px;
   padding: 20px;
   margin: 20px auto;
-  height: 90vh;
+  height: 90%; /* KioskStage 고정 박스(768x1024) 기준 비율 */
   width: 100%;
   max-width: 760px;
   background-color: white;

@@ -8,15 +8,24 @@
     box-sizing: border-box;
     margin: 20px;
     position: relative; /* Ensure relative positioning for overlay */
+    /* 메뉴 영역은 스크롤 없이 전체가 한 번에 보이고,
+       내용이 화면 높이를 넘으면 화면 전체를 세로로 스크롤해서
+       하단 주문 내역·버튼까지 볼 수 있도록 함 */
+    height: 97%;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 
-\.generalmenu-top-bar {
+.generalmenu-top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 35px;
     margin-top: 0px; /* Ensure the top bar is not pushed too far up */
+    flex-shrink: 0;
 }
 
 .generalmenu-store-name {
@@ -24,40 +33,38 @@
     color: #FF428C;
     font-weight: bold;
     text-align: left;
-    /*margin-top: 180px; /* Reset negative margin that was hiding the text */
-    margin-top: 10px;
-    margin-bottom: -60px; /* Adjust margin for spacing */
+    margin: 0 30px 0 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.generalmenu-top-bar-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
 }
 
 .generalmenu-call-employee-button, .generalmenu-home-button {
-    padding: 10px 20px;
+    padding: 10px 12px;
     font-size: 1.8rem;
     font-weight: bold;
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    width: 140px;
-    margin-bottom: 30px;
+    width: 135px;
+    box-sizing: border-box;
+    white-space: nowrap;
 }
-
 
 .generalmenu-call-employee-button {
     background-color: #2D76E2;
     color: white;
-    margin-right: 5px;
-    margin-left: 450px;
-    margin-bottom: -100px;
-    margin-top: -40px;
-    
 }
 
 .generalmenu-home-button {
     background-color: #FFEDF4;
     color: #FF428C;
-    /*margin-right: 150px;
-    margin-left: 550px;
-    margin-bottom: 100px;
-    margin-top: -90px;*/
 }
 
 .generalmenu-category-tabs {
@@ -65,6 +72,7 @@
     justify-content: space-around;
     margin-bottom: 0px;
     gap: 0;
+    flex-shrink: 0;
 }
 
 .generalmenu-category-tab {
@@ -90,13 +98,16 @@
     border-radius: 10px;
     padding: 15px;
     margin-top: 0px;
+    /* 메뉴 목록은 잘리거나 스크롤되지 않고 내용 그대로 전부 표시 */
+    flex-shrink: 0;
 }
 
 
 .generalmenu-menu-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr); /* 3 columns layout */
-    grid-template-rows: repeat(3, 1fr); /* 2 rows layout */
+    /* 행 개수를 고정하지 않고 실제 항목 수만큼만 자동으로 생성 →
+       항목이 적은 카테고리에서 빈 행 때문에 테두리가 불필요하게 길어지는 문제 방지 */
     gap: 15px;
     margin-bottom: 20px;
 }
@@ -104,11 +115,18 @@
 
 .generalmenu-menu-item {
     text-align: center;
-    padding: 25px;
+    padding: 25px 12px;
     background-color: #fff;
     border-radius: 10px;
     cursor: pointer;
     position: relative; /* Add relative positioning to contain the NEW label */
+    /* 그리드가 같은 행의 항목들을 같은 높이로 맞춰주므로(1fr),
+       이미지·이름은 위에서 자연스럽게 쌓이고 가격표만 항상 카드 맨 아래에 고정 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    box-sizing: border-box;
 }
 
 .generalmenu-menu-image {
@@ -160,16 +178,20 @@
     margin-top: 10px;
     margin-bottom: 5px;
     font-weight: bold;
+    word-break: keep-all; /* 띄어쓰기 단위로만 줄바꿈, 단어 중간에서 끊기지 않도록 */
+    overflow-wrap: break-word;
+    width: 100%;
 }
 
 .generalmenu-menu-name-ko {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
 }
 
 .generalmenu-menu-name-en {
     font-size: 1rem;
     font-weight: normal;
     color: #666;
+    margin-top: 6px;
 }
 
 .generalmenu-menu-price {
@@ -180,7 +202,8 @@
     padding: 5px 10px;
     border-radius: 10px;
     display: inline-block;
-    margin-top: 10px;
+    margin-top: auto; /* 이름 길이와 무관하게 카드 맨 아래에 고정 */
+    padding-top: 5px;
 }
 
 .generalmenu-pagination-controls {
@@ -204,22 +227,22 @@
 .generalmenu-order-history {
     text-align: left;
     margin-top: 10px;
+    /* 부모(.general-menu-screen)의 padding(20px)뿐 아니라 그 바깥의
+       margin(20px)까지 상쇄해서 키오스크 화면(kiosk-stage) 가장자리에
+       완전히 맞닿도록 확장 */
     margin-left: -40px;
-    margin-right: 80px;
+    margin-right: -55px;
     font-size: 1.5rem;
     font-weight: bold;
     color: white;
     background: linear-gradient(to right, #FF428C, #F77062);
-    /*padding: 0px 50px 0px;*
-    padding-left: 50px; /* Maintain horizontal padding */
     padding-right: 70px;
     padding-left: 50px;
     padding-top: 10px;
     padding-bottom: 0px;
     border-radius: 0;
-    width: 100%;
-    height: 100%;
     line-height: 40px;
+    flex-shrink: 0;
 }
 
 /* Product Name, Quantity, Amount Section */
@@ -228,6 +251,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
+    flex-shrink: 0;
 }
 
 .generalmenu-order-summary-header {
@@ -261,6 +285,7 @@
     justify-content: space-between;
     margin-top: 20px;
     gap: 20px; /* Increased space between Cancel and Pay buttons */
+    flex-shrink: 0;
 }
 
 .generalmenu-order-items {
@@ -342,13 +367,7 @@
     background-color: #F01D00;
 }
 
-/* KioskStage가 항상 고정 박스 크기로 렌더링을 보장하므로 실제 기기 뷰포트 기준 media query 제거.
-   버튼이 잘리지 않도록 항상 적용되어야 하는 스타일이면 기본 규칙으로 옮길 것. */
-.general-menu-screen {
-    height: auto;
-    padding-bottom: 100px;
-}
-
+/* KioskStage가 항상 고정 박스 크기로 렌더링을 보장하므로 실제 기기 뷰포트 기준 media query 제거. */
 
 /* Popup Styles */
 .generalmenu-menu-popup {
@@ -368,7 +387,7 @@
 .generalmenu-popup-content {
     background: white;
     width: 90%; /* Slightly wider */
-    max-width: 600px;
+    max-width: 680px;
     height: auto; /* Height adapts to content */
     border-radius: 10px;
     overflow: hidden;
@@ -417,7 +436,7 @@
 
 
 .generalmenu-popup-image {
-    flex: 1; /* Take 1 portion of the available space */
+    flex: 0 0 auto; /* 이미지는 필요한 크기만 차지, 텍스트 영역이 넓어지도록 */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -434,6 +453,11 @@
     margin-top: 70px;
 }
 
+.generalmenu-popup-details {
+    flex: 1; /* 남는 공간을 모두 텍스트 영역이 차지 */
+    min-width: 0; /* flex item이 내용 때문에 넘치지 않도록 */
+}
+
 .generalmenu-popup-details p{
     flex-grow: 1;
     display: flex;
@@ -442,24 +466,30 @@
     font-weight: bold;
     margin-top: 0px;
     font-size: 1.8rem !important;
-    word-wrap: break-word; /* Break long menu names if necessary */
-    max-width: 250px; /* Prevent menu name from expanding too much */
+    word-break: keep-all; /* 단어 중간이 아니라 띄어쓰기 단위로만 줄바꿈 */
+    overflow-wrap: break-word; /* 그래도 넘칠 경우를 대비한 안전장치 */
+    max-width: 100%; /* 부모(details) 너비만큼 최대한 활용 */
     margin-left: 0;
     padding-left: 0px;
     text-align: left;
 }
 
 .generalmenu-popup-details h3 {
-    font-size: 2.8rem;
     color: #FF428C;
-    /*background-color: #FFE500;*
-    margin: 0px 0;
-    margin-bottom: 15px;
-    word-break: break-word; /* Break long words */
+    margin: 15px 0;
+    word-break: keep-all; /* 띄어쓰기 단위로만 줄바꿈 */
+    overflow-wrap: break-word;
     max-width: 100%; /* Ensure long names don't overflow */
     text-align: left;
-    margin-top: 15px;
-    
+}
+
+.generalmenu-popup-name-ko {
+    font-size: 2.8rem;
+}
+
+.generalmenu-popup-name-en {
+    font-size: 1.8rem;
+    white-space: nowrap;
 }
 
 
@@ -553,15 +583,6 @@
 .general-add-button {
     background-color: #FF428C;
     color: white;
-}
-
-.general-menu-screen {
-    padding: 20px;
-    background-color: #fff;
-    font-family: Arial, sans-serif;
-    box-sizing: border-box;
-    margin: 20px;
-    position: relative; /* Ensure relative positioning for overlay */
 }
 
 
@@ -742,6 +763,8 @@
     font-weight: bold;
     color: black;
     white-space: pre-line; /* Allow <br /> to create new lines */
+    word-break: keep-all; /* 띄어쓰기 단위로만 줄바꿈 */
+    overflow-wrap: break-word;
   }
   
   /* Price Container */

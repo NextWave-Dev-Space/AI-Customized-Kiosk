@@ -8,7 +8,7 @@
   margin: 20px;
   border: 1px solid #FF428C;
   border-radius: 15px;
-  height: 110vh;
+  height: 100%; /* KioskStage 고정 박스(768x1024) 기준 비율. 기존 110vh는 고정 박스 안에서 하단이 잘려나가므로 100%로 보정 */
 }
 
 .orderdetails-history-header {

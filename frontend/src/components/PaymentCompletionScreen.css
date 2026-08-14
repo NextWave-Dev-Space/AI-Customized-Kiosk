@@ -4,7 +4,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 90vh; /* Ensure it fits within the viewport */
+    height: 90%; /* KioskStage 고정 박스(768x1024) 기준 비율 */
     text-align: center;
     border: 1px solid #FF428C;
     border-radius: 15px;

@@ -23,6 +23,8 @@ public class OrderItem {
     @Column(nullable = false)
     private String menuName;
 
+    // "option"은 MySQL 예약어라 그대로 쓰면 DDL 오류가 나므로 컬럼명을 명시적으로 escape
+    @Column(name = "`option`")
     private String option;
 
     @Column(nullable = false)

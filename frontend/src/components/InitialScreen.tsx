@@ -24,7 +24,7 @@ const InitialScreen = () => {
     if (!isSpeechTriggered && 'speechSynthesis' in window) {
       speakText('어서 오세요. 딥러닝을 활용한 사용자 맞춤형 키오스크입니다. 주문을 시작하려면 아래의 주문 시작 버튼을 눌러주세요.');
       setIsSpeechTriggered(true);
-      setInstructionText('현금 결제를 원하시는 분과 시각 장애인이신 분은 카운터로 와주세요.');
+      setInstructionText('현금 결제를 원하시는 분과\n시각 장애인이신 분은\n카운터로 와주세요.');
     }
   };
 
@@ -50,22 +50,28 @@ const InitialScreen = () => {
       </p>
 
       <div className="initial-instruction-text-container">
-        <p className="initial-instruction-text">{instructionText}</p>
+        <p className="initial-instruction-text">
+          {instructionText.split('\n').map((line, idx, arr) => (
+            <React.Fragment key={idx}>
+              {line}
+              {idx < arr.length - 1 && <br />}
+            </React.Fragment>
+          ))}
+        </p>
       </div>
 
       <div className="initial-button-container">
         <button className="initial-option-button" onClick={() => router.push('/face-recognition')}>
           주문 시작
         </button>
+        <button
+          className="initial-privacy-policy-link"
+          onClick={() => router.push('/privacy-policy')}
+        >
+          개인정보처리방침 보기
+        </button>
         <button className="initial-transparent-button" onClick={() => {}}></button>
       </div>
-
-      <button
-        className="initial-privacy-policy-link"
-        onClick={() => router.push('/privacy-policy')}
-      >
-        개인정보처리방침 보기
-      </button>
     </div>
   );
 };

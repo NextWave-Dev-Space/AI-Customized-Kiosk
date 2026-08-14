@@ -106,6 +106,13 @@
     border-radius: 10px;
     cursor: pointer;
     position: relative; /* Add relative positioning to contain the NEW label */
+    /* 그리드가 같은 행의 항목들을 같은 높이로 맞춰주므로(1fr),
+       이미지·이름은 위에서 자연스럽게 쌓이고 가격표만 항상 카드 맨 아래에 고정 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    box-sizing: border-box;
 }
 
 .ElderlyMenu-menu-image {
@@ -158,6 +165,9 @@
     margin-top: 10px;
     margin-bottom: 5px;
     font-weight: bold;
+    word-break: keep-all; /* 띄어쓰기 단위로만 줄바꿈 */
+    overflow-wrap: break-word;
+    width: 100%;
 }
 
 .ElderlyMenu-menu-price {
@@ -168,7 +178,7 @@
     padding: 5px 10px;
     border-radius: 10px;
     display: inline-block;
-    margin-top: 10px;
+    margin-top: auto; /* 이름 길이와 무관하게 카드 맨 아래에 고정 */
 }
 
 .ElderlyMenu-menu-pagination-controls {
@@ -439,14 +449,11 @@
 .ElderlyMenu-menu-popup-details h3 {
     font-size: 2.8rem;
     color: #00BA3C;
-    /*background-color: #FFE500;*
-    margin: 0px 0;
-    margin-bottom: 15px;
-    word-break: break-word; /* Break long words */
+    margin: 15px 0;
+    word-break: keep-all; /* 띄어쓰기 단위로만 줄바꿈 */
+    overflow-wrap: break-word;
     max-width: 100%; /* Ensure long names don't overflow */
     text-align: left;
-    margin-top: 15px;
-    
 }
 
 

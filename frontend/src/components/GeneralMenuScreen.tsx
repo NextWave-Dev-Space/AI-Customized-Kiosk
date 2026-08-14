@@ -8,43 +8,43 @@ import './GeneralMenuScreen.css';
 
 const menuData: Record<string, MenuItem[]> = {
   new: [
-    { name: '슈슈 버거\nSupreme Shrimp Burger', price: 4700, img: '/images/chicken_burger.png', description: '새콤달콤 특제소스를 듬뿍 넣은 탱글한<br />통새우살이 가득한<br />슈슈 버거' },
-    { name: '화이트갈릭버거\nWhite Garlic Burger', price: 4900, img: '/images/cheese_burger.png', description: '부드러운 마늘 소스에 프리미엄 더블 햄과<br />통가슴살 패티까지<br />담은 묵직한 버거' },
-    { name: '할라피뇨통살버거\nJalapeno Thigh Burger', price: 4800, img: '/images/shrimp_jalapeno_burger.png', description: '바삭한 통다리살<br />패티와 매콤한<br />할라피뇨 소스가 어우러진 버거' },
+    { name: '슈프림\n슈림프 버거\nSupreme\nShrimp\nBurger', price: 4700, img: '/images/chicken_burger.png', description: '새콤달콤 특제소스를 듬뿍 넣은 탱글한<br />통새우살이 가득한<br />슈슈 버거' },
+    { name: '화이트 갈릭 버거\nWhite\nGarlic\nBurger', price: 4900, img: '/images/cheese_burger.png', description: '부드러운 마늘 소스에 프리미엄 더블 햄과<br />통가슴살 패티까지<br />담은 묵직한 버거' },
+    { name: '할라피뇨 통살 버거\nJalapeno\nThigh\nBurger', price: 4800, img: '/images/shrimp_jalapeno_burger.png', description: '바삭한 통다리살<br />패티와 매콤한<br />할라피뇨 소스가 어우러진 버거' },
   ],
   single: [
-    { name: '불고기 버거\nBulgogi Burger', price: 3900, img: '/images/bulgogi_burger.png', description: '한국인의 입맛에 딱 맞는 불고기 소스에 재운 패티', best: true },
-    { name: '더블 불고기 버거\nDouble Bulgogi Burger', price: 5200, img: '/images/shrimp_jalapeno_burger.png', description: '진한 불고기 소스에 재운 패티 두 장' },
-    { name: '치즈버거\nCheese Burger', price: 3300, img: '/images/bulgogi_burger.png', description: '고소하고 부드러운 치즈와 100% 순 쇠고기 패티' },
-    { name: '콰트로 치즈버거\nQuattro Cheese Burger', price: 5400, img: '/images/cheese_burger.png', description: '4가지 고급 치즈와 풍부한 육즙의 패티' },
-    { name: '데리버거\nTeri Burger', price: 3300, img: '/images/bulgogi_burger.png', description: '쇠고기 패티에 달콤짭짤한 데리 소스' },
-    { name: '치킨버거\nChicken Burger', price: 4000, img: '/images/chicken_burger.png', description: '닭고기 패티와 데리야끼 소스로 만든 담백한 치킨버거' },
-    { name: '핫크리스피 디럭스 버거\nHotCrispy Deluxe Burger', price: 5900, img: '/images/shrimp_jalapeno_burger.png', description: '100% 통닭다리살 겉바속촉 케이준 치킨 패티' },
-    { name: '토마토치즈 비프버거\nTomato Cheese Beef Burger', price: 3800, img: '/images/tomato_burger.png', description: '신선한 토마토와 매콤달콤한 소스, 고소한 치즈', best: true },
+    { name: '불고기 버거\nBulgogi\nBurger', price: 3900, img: '/images/bulgogi_burger.png', description: '한국인의 입맛에 딱 맞는 불고기 소스에 재운 패티', best: true },
+    { name: '더블 불고기\n버거\nDouble\nBulgogi\nBurger', price: 5200, img: '/images/shrimp_jalapeno_burger.png', description: '진한 불고기 소스에 재운 패티 두 장' },
+    { name: '치즈 버거\nCheese\nBurger', price: 3300, img: '/images/bulgogi_burger.png', description: '고소하고 부드러운 치즈와 100% 순<br />쇠고기 패티' },
+    { name: '콰트로 치즈\n버거\nQuattro\nCheese\nBurger', price: 5400, img: '/images/cheese_burger.png', description: '4가지 고급 치즈와 풍부한 육즙의 패티' },
+    { name: '데리 버거\nTeri\nBurger', price: 3300, img: '/images/bulgogi_burger.png', description: '쇠고기 패티에 달콤짭짤한 데리 소스' },
+    { name: '치킨 버거\nChicken\nBurger', price: 4000, img: '/images/chicken_burger.png', description: '닭고기 패티와 데리야끼 소스로 만든<br />담백한 치킨버거' },
+    { name: '핫크리스피\n디럭스 버거\nHotCrispy\nDeluxe\nBurger', price: 5900, img: '/images/shrimp_jalapeno_burger.png', description: '100% 통닭다리살 겉바속촉 케이준 치킨 패티' },
+    { name: '토마토 치즈\n비프 버거\nTomato\nCheese\nBeef\nBurger', price: 3800, img: '/images/tomato_burger.png', description: '신선한 토마토와 매콤달콤한<br />소스, 고소한 치즈', best: true },
   ],
   set: [
-    { name: '불고기 버거 세트\nBulgogi Burger Set', price: 6200, img: '/images/burger_set.png', description: '불고기 버거 세트' },
-    { name: '더블불고기 버거세트\nDouble Bulgogi Burger Set', price: 7500, img: '/images/burger_set.png', description: '더블 불고기 버거 세트' },
-    { name: '치즈버거 세트\nCheese Burger Set', price: 5500, img: '/images/burger_set.png', description: '치즈버거 세트' },
-    { name: '데리버거 세트\nTeri Burger Set', price: 5600, img: '/images/burger_set.png', description: '데리버거 세트', best: true },
-    { name: '치킨버거 세트\nChicken Burger Set', price: 6300, img: '/images/burger_set.png', description: '치킨버거 세트' },
-    { name: '핫크리스피 디럭스 버거세트\nHotCrispy Deluxe Burger Set', price: 7800, img: '/images/burger_set.png', description: '핫크리스피 버거 세트', best: true },
-    { name: '토마토치즈비프 버거 세트\nTomato Cheese Beef Burger Set', price: 5600, img: '/images/burger_set.png', description: '토마토치즈비프 버거 세트' },
+    { name: '불고기 버거 세트\nBulgogi\nBurger\nSet', price: 6200, img: '/images/burger_set.png', description: '불고기 버거 세트' },
+    { name: '더블 불고기 버거 세트\nDouble\nBulgogi\nBurger\nSet', price: 7500, img: '/images/burger_set.png', description: '더블 불고기 버거 세트' },
+    { name: '치즈 버거 세트\nCheese\nBurger\nSet', price: 5500, img: '/images/burger_set.png', description: '치즈버거 세트' },
+    { name: '데리 버거 세트\nTeri\nBurger\nSet', price: 5600, img: '/images/burger_set.png', description: '데리버거 세트', best: true },
+    { name: '치킨 버거 세트\nChicken\nBurger\nSet', price: 6300, img: '/images/burger_set.png', description: '치킨버거 세트' },
+    { name: '핫크리스피 디럭스 버거 세트\nHotCrispy\nDeluxe\nBurger\nSet', price: 7800, img: '/images/burger_set.png', description: '핫크리스피 버거 세트', best: true },
+    { name: '토마토 치즈 비프 버거 세트\nTomato\nCheese\nBeef\nBurger\nSet', price: 5600, img: '/images/burger_set.png', description: '토마토치즈비프 버거 세트' },
   ],
   drink: [
     { name: '코카콜라\nCola', price: 2000, img: '/images/coke.png', description: '톡 쏘는 시원함과 상쾌함', best: true },
     { name: '사이다\nSprite', price: 2000, img: '/images/soda.png', description: '톡 쏘는 시원함' },
     { name: '아메리카노\nAmericano', price: 2600, img: '/images/coffee.png', description: '아라비카 원두 100% 부드러운 커피' },
-    { name: '오렌지 주스\nOrange Juice', price: 2500, img: '/images/orange_juice.png', description: '비타민 C를 100% 함유한 오렌지 주스' },
+    { name: '오렌지 주스\nOrange\nJuice', price: 2500, img: '/images/orange_juice.png', description: '비타민 C를 100% 함유한 오렌지 주스' },
     { name: '생수\nWater', price: 1000, img: '/images/water.png', description: '활력을 되찾아주는 깔끔한 생수' },
   ],
   side: [
-    { name: '치킨너겟\nChicken Nugget', price: 2700, img: '/images/nuggets.png', description: '닭안심살과 닭가슴살로 만든 치킨너겟 (5조각+소스)' },
-    { name: '후렌치 후라이\nFrench Fries', price: 2200, img: '/images/frenchfries.png', description: '통으로 썰어낸 감자를 튀겨낸 감자튀김', best: true },
-    { name: '골든 모짜렐라 치즈스틱\nGolden Mozzarella Cheese Sticks', price: 2400, img: '/images/cheese_stick.png', description: '바삭하고 고소한 치즈스틱 (2조각)' },
-    { name: '바닐라 아이스크림콘\nVanilla Ice Cream Cone', price: 1300, img: '/images/ice_cream.png', description: '신선한 우유로 만든 아이스크림콘', best: true },
+    { name: '치킨 너겟\nChicken\nNugget', price: 2700, img: '/images/nuggets.png', description: '닭안심살과 닭가슴살로 만든 치킨너겟 (5조각+소스)' },
+    { name: '후렌치 후라이\nFrench\nFries', price: 2200, img: '/images/frenchfries.png', description: '통으로 썰어낸 감자를 튀겨낸 감자튀김', best: true },
+    { name: '골든 모짜렐라 치즈 스틱\nGolden\nMozzarella\nCheese\nSticks', price: 2400, img: '/images/cheese_stick.png', description: '바삭하고 고소한 치즈스틱 (2조각)' },
+    { name: '바닐라\n아이스크림 콘\nVanilla\nIce\nCream\nCone', price: 1300, img: '/images/ice_cream.png', description: '신선한 우유로 만든 아이스크림콘', best: true },
     { name: '코울슬로\nColeslaw', price: 1900, img: '/images/coleslaw.png', description: '양배추, 당근, 양파가 마요네즈 드레싱과 어우러진 샐러드' },
-    { name: '사이드소스\nSauce', price: 500, img: '/images/source.png', description: '치킨너겟, 감자튀김용 소스 (칠리맛)' },
+    { name: '사이드 소스\nSauce', price: 500, img: '/images/source.png', description: '치킨너겟, 감자튀김용 소스 (칠리맛)' },
   ],
 };
 
@@ -150,7 +150,7 @@ const GeneralMenuScreen = () => {
       {isBackgroundDimmed && <div className="generalmenu-overlay"></div>}
       <div className="generalmenu-top-bar">
         <h1 className="generalmenu-store-name">Fastfood Kiosk</h1>
-        <div>
+        <div className="generalmenu-top-bar-buttons">
           <button className="generalmenu-call-employee-button" onClick={handleCallEmployee}>직원호출</button>
           <button className="generalmenu-home-button" onClick={() => router.push('/')}>홈</button>
         </div>
@@ -176,8 +176,10 @@ const GeneralMenuScreen = () => {
                 {item.best && <span className="generalmenu-best-label">BEST</span>}
               </div>
               <div className="generalmenu-menu-name">
+                {/* 한글이 포함된 줄은 ko 스타일, 그렇지 않은 줄(영문)은 en 스타일 —
+                    줄 순서가 아니라 실제 내용으로 판단하므로 한글 이름이 여러 줄이어도 문제없음 */}
                 {item.name.split('\n').map((line, lineIdx) => (
-                  <div key={lineIdx} className={lineIdx === 0 ? 'generalmenu-menu-name-ko' : 'generalmenu-menu-name-en'}>
+                  <div key={lineIdx} className={/[가-힣]/.test(line) ? 'generalmenu-menu-name-ko' : 'generalmenu-menu-name-en'}>
                     {line}
                   </div>
                 ))}
@@ -223,7 +225,28 @@ const GeneralMenuScreen = () => {
                 <img src={popupItem.img} alt={popupItem.name} />
               </div>
               <div className="generalmenu-popup-details">
-                <h3 dangerouslySetInnerHTML={{ __html: popupItem.name.replace(/\n/g, '<br />') }} />
+                <h3>
+                  {/* 한글 줄은 기존처럼 줄 단위로, 영어 줄들은 하나로 합쳐 한 줄로 표기 */}
+                  {(() => {
+                    const rawLines = popupItem.name.split('\n');
+                    let koLines = rawLines.filter(line => /[가-힣]/.test(line));
+                    const enLine = rawLines.filter(line => !/[가-힣]/.test(line)).join(' ');
+                    // '더블 불고기 버거' 팝업만 한글 이름을 줄바꿈 없이 한 줄로 표기
+                    if (popupItem.name.includes('더블 불고기') || popupItem.name.includes('콰트로 치즈') || popupItem.name.includes('토마토 치즈')) {
+                      koLines = [koLines.join(' ')];
+                    }
+                    return (
+                      <>
+                        {koLines.map((line, idx) => (
+                          <div key={`ko-${idx}`} className="generalmenu-popup-name-ko">{line}</div>
+                        ))}
+                        {enLine && (
+                          <div className="generalmenu-popup-name-en">{enLine}</div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </h3>
                 <p dangerouslySetInnerHTML={{ __html: popupItem.description }} />
                 {(popupItem.name.includes('코카콜라') || popupItem.name.includes('사이다')) && (
                   <div className="generalmenu-option-selection">

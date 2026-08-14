@@ -3,7 +3,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 90vh;
+    height: 90%; /* KioskStage 고정 박스(768x1024) 기준 비율 */
     background-color: #fff;
     font-family: Arial, sans-serif;
     padding: 20px;
