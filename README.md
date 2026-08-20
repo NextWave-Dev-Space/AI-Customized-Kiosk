@@ -32,22 +32,39 @@
 
 ### 💻 Frontend
 
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge\&logo=next.js\&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge\&logo=react\&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge\&logo=typescript\&logoColor=white)
 ![HTML](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge\&logo=html5\&logoColor=white)
 ![CSS](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge\&logo=css3\&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge\&logo=javascript\&logoColor=F7DF1E)
+![TensorFlow.js](https://img.shields.io/badge/TensorFlow.js-FF6F00?style=for-the-badge\&logo=tensorflow\&logoColor=white)
+![Toss Payments](https://img.shields.io/badge/Toss%20Payments-0064FF?style=for-the-badge)
 
 ### ⚙️ Backend
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge\&logo=python\&logoColor=white)
-![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge\&logo=flask\&logoColor=white)
+![Java](https://img.shields.io/badge/Java%2021-007396?style=for-the-badge\&logo=openjdk\&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge\&logo=springboot\&logoColor=white)
+![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-6DB33F?style=for-the-badge\&logo=spring\&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge\&logo=mysql\&logoColor=white)
+![Gradle](https://img.shields.io/badge/Gradle-02303A?style=for-the-badge\&logo=gradle\&logoColor=white)
 
 ### 🤖 AI / ML
 
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge\&logo=python\&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge\&logo=flask\&logoColor=white)
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge\&logo=tensorflow\&logoColor=white)
+![Keras](https://img.shields.io/badge/Keras-D00000?style=for-the-badge\&logo=keras\&logoColor=white)
 ![OpenCV](https://img.shields.io/badge/OpenCV-27338e?style=for-the-badge\&logo=opencv\&logoColor=white)
+![Transfer Learning](https://img.shields.io/badge/Transfer%20Learning%20(MobileNetV2)-9B5DE5?style=for-the-badge)
 ![HaarCascade](https://img.shields.io/badge/Haar%20Cascade-0A9396?style=for-the-badge)
-![DeepLearning](https://img.shields.io/badge/Deep%20Learning-9B5DE5?style=for-the-badge)
+
+> 나이대 분류 모델은 ImageNet으로 사전학습된 **MobileNetV2**를 백본(backbone)으로 활용하고,<br/>
+> 그 위에 직접 설계한 분류 헤드(GAP → BN → Dense → Dropout → Softmax)를 얹어<br/>
+> **전이 학습(Transfer Learning) 및 미세 조정(Fine-tuning)** 방식으로 직접 학습했습니다.
+
+### 🐳 Infra / DevOps
+
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge\&logo=docker\&logoColor=white)
 
 ---
 <br>
