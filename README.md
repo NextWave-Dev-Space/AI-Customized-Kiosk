@@ -82,7 +82,7 @@
 
 ## 🏗 시스템 구조
 
-![시스템 구조](./images/System_Structure.png)
+![시스템 구조](./images/system_structure.png)
 
 본 시스템은 React 기반 프론트엔드와 Flask 기반 백엔드로 구성된 클라이언트-서버 구조를 기반으로 동작한다.<br/>
 사용자가 키오스크 화면 앞에 서면, 프론트엔드는 웹캠을 통해 이미지를 캡처하고<br/>
@@ -137,6 +137,7 @@ Pooling을 통해 데이터 크기를 줄이면서 중요한 정보만 유지하
 
 ![얼굴 인식 기본 화면_1](./images/Face_recognition_main_screen_1.png)
 ![얼굴 인식 기본 화면_2](./images/Face_recognition_main_screen_2.png)
+![고령층용 얼굴 인식 기본 화면](./images/Basic_screen_for_facial_recognition_for_the_elderly.png)
 
 <br>
 
@@ -144,55 +145,48 @@ Pooling을 통해 데이터 크기를 줄이면서 중요한 정보만 유지하
 
 <br>
 
-### 2. 청년층용 UI
-### 2-1. 청년층용 메뉴 선택 화면
+### 2. 청년/고령층용 UI
+### 2-1. 청년/고령층용 메뉴 선택 화면
 
 ![청년층용 메뉴 선택 화면](./images/A_menu_selection_screen_for_young_people_1.png)
+![고령층용 메뉴 선택 화면](./images/Menu_selection_screen_for_the_elderly_1.png)
 
 <br>
 <br>
 
-### 2-2. 청년층용 주문 내역 확인 화면
+### 2-2. 청년/고령층용 주문 내역 확인 화면 및 청년층용 쿠폰 입력 화면
 
 ![청년층용 주문 내역 확인 화면](./images/Check_Order_History_for_Young_People_Screen.png)
+![고령층용 주문 내역 확인 화면](./images/Check_Order_History_for_Elderly_Screen.png)
+![청년층용 쿠폰 입력 화면](./images/Enter_coupon_code_screen_for_young_people.png)
+
 
 <br>
 <br>
 
-### 2-3. 청년층용 결제 방식 선택 화면
+### 2-3. 청년/고령층용 식사 방식 선택, 결제 방식 선택 화면 및 직원 호출 화면
 
+![고령층용 식사 방식 선택 화면](./images/Select_dining_method.png)
 ![청년층용 결제 방식 선택 화면](./images/Screen_of_payment_method_selection_for_young_people.png)
+![고령층용 직원 호출 화면](./images/Call_an_employee.png)
 
 <br>
 <br>
 
-### 2-4. 청년층용 결제 방식 선택 화면 (카드 선택)
+### 2-4. 청년층용 결제 방식 선택 화면 (카드,페이 선택 / 고령층용도 유사)
 
 ![청년층용 결제 방식 선택 화면 (카드 선택)](./images/Payment_method_selection_screen_for_young_people_card_selection.png)
-
-<br>
-<br>
-
-### 2-5. 청년층용 결제 방식 선택 화면 (페이 선택)
-
 ![청년층용 결제 방식 선택 화면 (페이 선택)](./images/Payment_method_selection_screen_for_young_people_Pay_selection.png)
 
 <br>
 <br>
 
+### 2-5. 청년층용 결제 완료 화면 (고령층용도 유사)
+
+![청년층용 결제 완료 화면](./images/Card_payment_screen.png)
+![청년층용 결제 완료 화면](./images/Payment_completed_screen_for_young_people.png)
+
+<br>
+<br>
+
 ---
-
-### 3. 고령층용 UI
-### 3-1. 얼굴 인식 기본 화면
-
-![고령층용 얼굴 인식 기본 화면](./images/Basic_screen_for_facial_recognition_for_the_elderly.png)
-
-<br>
-<br>
-
-### 3-2. 고령층용 메뉴 선택 화면
-
-![고령층용 메뉴 선택 화면](./images/Menu_selection_screen_for_the_elderly_1.png)
-
-<br>
-<br>
