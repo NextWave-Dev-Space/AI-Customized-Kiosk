@@ -36,7 +36,9 @@ export const getMenuItems = async (category?: string): Promise<MenuItem[]> => {
   return response.data;
 };
 
-export const predictAge = async (base64Image: string): Promise<{ predicted_age: number; interface: string }> => {
+export const predictAge = async (
+  base64Image: string
+): Promise<{ predicted_age: number; interface: string; confidence: number }> => {
   const response = await axios.post(`${AI_BASE_URL}/predict-age`, { image: base64Image });
   return response.data;
 };

@@ -100,28 +100,43 @@ const FaceRecognition = () => {
         captures.map((imageDataUrl) => predictAge(imageDataUrl.split(',')[1]))
       );
 
-      const predictions: number[] = [];
-      let elderlyConfidence = 0;
-      let childConfidence = 0;
+      // AI 서버가 각 예측마다 함께 반환하는 신뢰도(confidence, 소프트맥스 확률)를 활용해
+      // 신뢰도가 낮은 예측은 걸러내고, 남은 예측은 신뢰도 가중 평균으로 최종 나이를 계산한다.
+      const CONFIDENCE_THRESHOLD = 0.4;
+      const allPredictions: { age: number; confidence: number }[] = [];
 
       results.forEach((result) => {
         if (result.status !== 'fulfilled') {
           console.error('Error predicting age: ', result.reason);
           return;
         }
-        const { predicted_age } = result.value;
-        predictions.push(predicted_age);
-        if (predicted_age >= 50) elderlyConfidence++;
-        if (predicted_age < 10) childConfidence++;
+        const { predicted_age, confidence } = result.value;
+        allPredictions.push({ age: predicted_age, confidence });
       });
 
-      if (predictions.length === 0) return;
+      if (allPredictions.length === 0) return;
+
+      // 신뢰도가 낮은 예측은 제외 — 단, 전부 낮은 신뢰도라면(예외적 상황) 전체를 그대로 사용
+      const reliablePredictions = allPredictions.filter((p) => p.confidence >= CONFIDENCE_THRESHOLD);
+      const predictions = reliablePredictions.length > 0 ? reliablePredictions : allPredictions;
+
+      let elderlyConfidence = 0;
+      let childConfidence = 0;
+      predictions.forEach(({ age }) => {
+        if (age >= 50) elderlyConfidence++;
+        if (age < 10) childConfidence++;
+      });
 
       // 나이 판별이 끝났으므로 더 이상 촬영이 필요 없음 → 카메라 즉시 종료(개인정보 최소 보유)
       stopCamera();
       clearInterval(detectionInterval);
 
-      const averageAge = Math.round(predictions.reduce((s, a) => s + a, 0) / predictions.length);
+      // 신뢰도 가중 평균: 신뢰도가 높은 예측일수록 최종 나이 계산에 더 크게 반영
+      const totalConfidence = predictions.reduce((s, p) => s + p.confidence, 0);
+      const averageAge =
+        totalConfidence > 0
+          ? Math.round(predictions.reduce((s, p) => s + p.age * p.confidence, 0) / totalConfidence)
+          : Math.round(predictions.reduce((s, p) => s + p.age, 0) / predictions.length);
       setPredictedAge(averageAge);
 
       if (averageAge < 10 || childConfidence >= 3) {
